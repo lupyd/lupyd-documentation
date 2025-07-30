@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lupyd Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #ffffff;
+            background-color: #000000;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #333333;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            height: 60px;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background: #ffffff;
+            border-radius: 4px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #cccccc;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav a:hover {
+            color: #ffffff;
+        }
+
+        .search-container {
+            position: relative;
+            margin: 0 20px;
+        }
+
+        .search-input {
+            padding: 8px 12px 8px 36px;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            width: 300px;
+            font-size: 14px;
+            background: #111111;
+            color: #ffffff;
+        }
+
+        .search-input::placeholder {
+            color: #666666;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #666666;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .btn-primary:hover {
+            background: #cccccc;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: #cccccc;
+            border: 1px solid #333333;
+        }
+
+        .btn-ghost:hover {
+            background: #111111;
+            color: #ffffff;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            color: #ffffff;
+        }
+
+        .mobile-nav {
+            display: none;
+            border-top: 1px solid #333333;
+            padding: 20px;
+            background: #000000;
+        }
+
+        .mobile-nav a {
+            display: block;
+            padding: 12px 0;
+            text-decoration: none;
+            color: #cccccc;
+            font-weight: 500;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr 300px;
+            gap: 40px;
+            padding: 40px 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .sidebar-links {
+            list-style: none;
+        }
+
+        .sidebar-links li {
+            margin-bottom: 4px;
+        }
+
+        .sidebar-links a {
+            display: block;
+            padding: 6px 12px;
+            text-decoration: none;
+            color: #cccccc;
+            font-size: 14px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar-links a:hover {
+            background: #111111;
+            color: #ffffff;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: none;
+        }
+
+        .hero {
+            margin-bottom: 48px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #ffffff;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #cccccc;
+            margin-bottom: 24px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-secondary {
+            background: #333333;
+            color: #ffffff;
+        }
+
+        .badge-outline {
+            background: transparent;
+            border: 1px solid #333333;
+            color: #ffffff;
+        }
+
+        /* Cards */
+        .card {
+            background: #111111;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .card-description {
+            color: #cccccc;
+            font-size: 14px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .feature-icon {
+            width: 32px;
+            height: 32px;
+            color: #ffffff;
+            margin-bottom: 16px;
+        }
+
+        /* Quick Start */
+        .quick-start-steps {
+            margin-bottom: 48px;
+        }
+
+        .step {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: #ffffff;
+            color: #000000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .step-content p {
+            color: #cccccc;
+            margin-bottom: 12px;
+        }
+
+        .code-block {
+            background: #000000;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            padding: 16px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            color: #ffffff;
+        }
+
+        /* API Endpoints */
+        .api-endpoints {
+            margin-bottom: 48px;
+        }
+
+        .endpoint-card {
+            margin-bottom: 16px;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .method-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .method-get { background: #333333; color: #ffffff; }
+        .method-post { background: #666666; color: #ffffff; }
+        .method-put { background: #999999; color: #000000; }
+        .method-delete { background: #ffffff; color: #000000; }
+
+        .endpoint-code {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            color: #cccccc;
+        }
+
+        /* Contact Section */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #111111;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .contact-item:hover {
+            background: #222222;
+        }
+
+        .contact-icon {
+            width: 20px;
+            height: 20px;
+            color: #ffffff;
+            flex-shrink: 0;
+        }
+
+        .contact-info h4 {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .contact-info p {
+            color: #cccccc;
+            font-size: 14px;
+        }
+
+        .contact-info a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+
+        /* Table of Contents */
+        .toc {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .toc-title {
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #ffffff;
+        }
+
+        .toc-links {
+            list-style: none;
+        }
+
+        .toc-links li {
+            margin-bottom: 8px;
+        }
+
+        .toc-links a {
+            display: block;
+            padding: 4px 0;
+            text-decoration: none;
+            color: #cccccc;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .toc-links a:hover {
+            color: #ffffff;
+        }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid #333333;
+            padding: 40px 0;
+            margin-top: 80px;
+        }
+
+        .footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: #cccccc;
+            font-size: 14px;
+        }
+
+        .footer-logo {
+            width: 24px;
+            height: 24px;
+            background: #ffffff;
+            border-radius: 4px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .sidebar, .toc {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .search-input {
+                width: 200px;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            .header-content {
+                flex-wrap: wrap;
+                height: auto;
+                padding: 12px 0;
+            }
+
+            .search-container {
+                order: 3;
+                width: 100%;
+                margin: 12px 0 0 0;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+        }
+
+        /* Syntax highlighting for code blocks */
+        .code-syntax .keyword { color: #ffffff; font-weight: bold; }
+        .code-syntax .string { color: #cccccc; }
+        .code-syntax .comment { color: #666666; }
+
+        /* Section headings */
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #ffffff;
+        }
+
+        /* Separators */
+        hr {
+            border: none;
+            border-top: 1px solid #333333;
+            margin: 48px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div style="display: flex; align-items: center; gap: 40px;">
+                    <a href="#" class="logo">
+                        <div class="logo-icon"></div>
+                        <span>Lupyd</span>
+                    </a>
+                    <nav class="nav">
+                        <a href="#getting-started">Getting Started</a>
+                        <a href="#api-reference">API Reference</a>
+                        <a href="#authentication">Authentication</a>
+                        <a href="#examples">Examples</a>
+                        <a href="#contact">Contact</a>
+                        <a href="#community">Community</a>
+                    </nav>
+                </div>
+
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+
+                <div class="search-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="search" class="search-input" placeholder="Search documentation..." id="searchInput">
+                </div>
+
+                <div class="header-buttons">
+                    <a href="#" class="btn btn-ghost">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                    <a href="#getting-started" class="btn btn-primary">
+                        Get Started
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12,5 19,12 12,19"></polyline>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <nav class="mobile-nav" id="mobileNav">
+                <a href="#getting-started">Getting Started</a>
+                <a href="#api-reference">API Reference</a>
+                <a href="#authentication">Authentication</a>
+                <a href="#examples">Examples</a>
+                <a href="#contact">Contact</a>
+                <a href="#community">Community</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h4 class="sidebar-title">Getting Started</h4>
+                    <ul class="sidebar-links">
+                        <li><a href="#installation">Installation</a></li>
+                        <li><a href="#quick-start">Quick Start</a></li>
+                        <li><a href="#configuration">Configuration</a></li>
+                    </ul>
+                </div>
+                <div class="sidebar-section">
+                    <h4 class="sidebar-title">API Reference</h4>
+                    <ul class="sidebar-links">
+                        <li><a href="#endpoints">Endpoints</a></li>
+                        <li><a href="#authentication">Authentication</a></li>
+                        <li><a href="#rate-limiting">Rate Limiting</a></li>
+                    </ul>
+                </div>
+                <div class="sidebar-section">
+                    <h4 class="sidebar-title">Support</h4>
+                    <ul class="sidebar-links">
+                        <li><a href="#contact">Contact Us</a></li>
+                        <li><a href="#basic-usage">Basic Usage</a></li>
+                        <li><a href="#advanced">Advanced Examples</a></li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Hero Section -->
+                <div class="hero">
+                    <h1>Lupyd Documentation</h1>
+                    <p>Everything you need to build amazing applications with Lupyd. Get started in minutes.</p>
+                    <div class="badges">
+                        <span class="badge badge-secondary">v2.1.0</span>
+                        <span class="badge badge-outline">TypeScript</span>
+                        <span class="badge badge-outline">React</span>
+                    </div>
+                </div>
+
+                <!-- Features Overview -->
+                <section>
+                    <h2>Why Choose Lupyd?</h2>
+                    <div class="features-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"></polygon>
+                                </svg>
+                                <h3 class="card-title">Lightning Fast</h3>
+                            </div>
+                            <p class="card-description">Built for speed with optimized performance and minimal overhead</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <circle cx="12" cy="16" r="1"></circle>
+                                    <path d="m7 11 0-5a5 5 0 0 1 10 0v5"></path>
+                                </svg>
+                                <h3 class="card-title">Secure by Default</h3>
+                            </div>
+                            <p class="card-description">Enterprise-grade security with built-in authentication and authorization</p>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="16,18 22,12 16,6"></polyline>
+                                    <polyline points="8,6 2,12 8,18"></polyline>
+                                </svg>
+                                <h3 class="card-title">Developer Friendly</h3>
+                            </div>
+                            <p class="card-description">Intuitive APIs and comprehensive documentation for rapid development</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Quick Start -->
+                <section id="getting-started" class="quick-start-steps">
+                    <h2>Quick Start</h2>
+                    <p style="color: #cccccc; margin-bottom: 32px;">Get up and running with Lupyd in just a few steps.</p>
+                    
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Installation</h3>
+                            <p>Install Lupyd using your preferred package manager</p>
+                            <div class="code-block">npm install lupyd</div>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Initialize</h3>
+                            <p>Set up your Lupyd configuration</p>
+                            <div class="code-block">lupyd init --project myapp</div>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Deploy</h3>
+                            <p>Deploy your application with a single command</p>
+                            <div class="code-block">lupyd deploy</div>
+                        </div>
+                    </div>
+                </section>
+
+                <hr>
+
+                <!-- API Reference -->
+                <section id="api-reference" class="api-endpoints">
+                    <h2>API Reference</h2>
+                    <p style="color: #cccccc; margin-bottom: 32px;">Complete reference for all Lupyd API endpoints.</p>
+                    
+                    <div class="card endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge method-get">GET</span>
+                            <code class="endpoint-code">/api/projects</code>
+                        </div>
+                        <p class="card-description">Retrieve all projects</p>
+                        <div class="code-block" style="margin-top: 16px;">
+                            <strong>Response:</strong><br>
+                            { "projects": [...] }
+                        </div>
+                    </div>
+
+                    <div class="card endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge method-post">POST</span>
+                            <code class="endpoint-code">/api/projects</code>
+                        </div>
+                        <p class="card-description">Create a new project</p>
+                        <div class="code-block" style="margin-top: 16px;">
+                            <strong>Response:</strong><br>
+                            { "id": "proj_123", "status": "created" }
+                        </div>
+                    </div>
+
+                    <div class="card endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge method-put">PUT</span>
+                            <code class="endpoint-code">/api/projects/:id</code>
+                        </div>
+                        <p class="card-description">Update an existing project</p>
+                        <div class="code-block" style="margin-top: 16px;">
+                            <strong>Response:</strong><br>
+                            { "id": "proj_123", "status": "updated" }
+                        </div>
+                    </div>
+
+                    <div class="card endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge method-delete">DELETE</span>
+                            <code class="endpoint-code">/api/projects/:id</code>
+                        </div>
+                        <p class="card-description">Delete a project</p>
+                        <div class="code-block" style="margin-top: 16px;">
+                            <strong>Response:</strong><br>
+                            { "status": "deleted" }
+                        </div>
+                    </div>
+                </section>
+
+                <hr>
+
+                <!-- Authentication -->
+                <section id="authentication">
+                    <h2>Authentication</h2>
+                    <p style="color: #cccccc; margin-bottom: 32px;">Secure your API requests with authentication tokens.</p>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">API Key Authentication</h3>
+                            <p class="card-description">Include your API key in the Authorization header of your requests.</p>
+                        </div>
+                        <div class="code-block">
+                            <span class="comment">// Example request</span><br>
+                            curl -H "Authorization: Bearer YOUR_API_KEY" \<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;https://api.lupyd.com/v1/projects
+                        </div>
+                    </div>
+                </section>
+
+                <hr>
+
+                <!-- Examples -->
+                <section id="examples">
+                    <h2>Code Examples</h2>
+                    <p style="color: #cccccc; margin-bottom: 32px;">Practical examples to help you integrate Lupyd into your applications.</p>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Basic Project Creation</h3>
+                            <p class="card-description">Create a new project using the Lupyd API</p>
+                        </div>
+                        <div class="code-block code-syntax">
+                            <span class="keyword">import</span> { LupydClient } <span class="keyword">from</span> <span class="string">'lupyd'</span><br><br>
+                            <span class="keyword">const</span> client = <span class="keyword">new</span> LupydClient({<br>
+                            &nbsp;&nbsp;apiKey: process.env.LUPYD_API_KEY<br>
+                            })<br><br>
+                            <span class="keyword">const</span> project = <span class="keyword">await</span> client.projects.create({<br>
+                            &nbsp;&nbsp;name: <span class="string">"My New Project"</span>,<br>
+                            &nbsp;&nbsp;description: <span class="string">"A sample project"</span><br>
+                            })
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">React Integration</h3>
+                            <p class="card-description">Using Lupyd with React applications</p>
+                        </div>
+                        <div class="code-block code-syntax">
+                            <span class="keyword">import</span> { useLupyd } <span class="keyword">from</span> <span class="string">'lupyd/react'</span><br><br>
+                            <span class="keyword">function</span> MyComponent() {<br>
+                            &nbsp;&nbsp;<span class="keyword">const</span> { projects, loading } = useLupyd()<br><br>
+                            &nbsp;&nbsp;<span class="keyword">if</span> (loading) <span class="keyword">return</span> <span class="string">&lt;div&gt;Loading...&lt;/div&gt;</span><br><br>
+                            &nbsp;&nbsp;<span class="keyword">return</span> (<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div&gt;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ projects.map(project =&gt; (<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;div key={project.id}&gt;{project.name}&lt;/div&gt;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)) }<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;<br>
+                            &nbsp;&nbsp;)<br>
+                            }
+                        </div>
+                    </div>
+                </section>
+
+                <hr>
+
+                <!-- Contact Section -->
+                <section id="contact">
+                    <h2>Contact Us</h2>
+                    <p style="color: #cccccc; margin-bottom: 32px;">Get in touch with our team for support, partnerships, or general inquiries.</p>
+                    
+                    <div class="contact-grid">
+                        <div class="contact-item">
+                            <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <div class="contact-info">
+                                <h4>Email Support</h4>
+                                <p><a href="mailto:support@lupyd.com">support@lupyd.com</a></p>
+                            </div>
+                        </div>
+
+                        <div class="contact-item">
+                            <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            <div class="contact-info">
+                                <h4>Phone Support</h4>
+                                <p><a href="tel:+1-555-0123">+1 (555) 012-3456</a></p>
+                            </div>
+                        </div>
+
+                        <div class="contact-item">
+                            <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <div class="contact-info">
+                                <h4>Office Address</h4>
+                                <p>123 Tech Street<br>San Francisco, CA 94105</p>
+                            </div>
+                        </div>
+
+                        <div class="contact-item">
+                            <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12,6 12,12 16,14"></polyline>
+                            </svg>
+                            <div class="contact-info">
+                                <h4>Business Hours</h4>
+                                <p>Mon-Fri: 9:00 AM - 6:00 PM PST<br>Weekend: Emergency only</p>
+                            </div>
+                        </div>
+
+                        <div class="contact-item">
+                            <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 19c-5 0-8-3-8-8s3-8 8-8 8 3 8 8-3 8-8 8z"></path>
+                                <path d="M17 17l4 4"></path>
+                            </svg>
+                            <div class="contact-info">
+                                <h4>Sales Inquiries</h4>
+                                <p><a href="mailto:sales@lupyd.com">sales@lupyd.com</a></p>
+                            </div>
+                        </div>
+
+                        <div class="contact-item">
+                            <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                            </svg>
+                            <div class="contact-info">
+                                <h4>Partnership</h4>
+                                <p><a href="mailto:partners@lupyd.com">partners@lupyd.com</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Enterprise Support</h3>
+                            <p class="card-description">Need dedicated support for your enterprise? Contact our enterprise team for custom solutions and priority support.</p>
+                        </div>
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                            <a href="mailto:enterprise@lupyd.com" class="btn btn-primary">Contact Enterprise Team</a>
+                            <a href="#" class="btn btn-ghost">Schedule a Demo</a>
+                        </div>
+                    </div>
+                </section>
+
+                <hr>
+
+                <!-- Community -->
+                <section id="community">
+                    <h2>Community & Support</h2>
+                    <p style="color: #cccccc; margin-bottom: 32px;">Join our community and get help from other developers.</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                                    </svg>
+                                    GitHub
+                                </h3>
+                                <p class="card-description">Contribute to the project and report issues</p>
+                            </div>
+                            <a href="#" class="btn btn-ghost" style="width: 100%; justify-content: center;">
+                                View on GitHub
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15,3 21,3 21,9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                    Discord
+                                </h3>
+                                <p class="card-description">Chat with the community and get real-time help</p>
+                            </div>
+                            <a href="#" class="btn btn-ghost" style="width: 100%; justify-content: center;">
+                                Join Discord
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15,3 21,3 21,9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <!-- Table of Contents -->
+            <aside class="toc">
+                <div class="toc-title">On This Page</div>
+                <ul class="toc-links">
+                    <li><a href="#getting-started">Getting Started</a></li>
+                    <li><a href="#api-reference">API Reference</a></li>
+                    <li><a href="#authentication">Authentication</a></li>
+                    <li><a href="#examples">Examples</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#community">Community</a></li>
+                </ul>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo"></div>
+                <p>Built by the Lupyd team. The source code is available on <a href="#" style="color: #ffffff; text-decoration: underline;">GitHub</a>.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const mobileNav = document.getElementById('mobileNav');
+            mobileNav.style.display = mobileNav.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const sections = document.querySelectorAll('section, .card');
+            
+            sections.forEach(section => {
+                const text = section.textContent.toLowerCase();
+                if (searchTerm === '' || text.includes(searchTerm)) {
+                    section.style.display = '';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Close mobile menu when clicking on links
+        document.querySelectorAll('.mobile-nav a').forEach(link => {
+            link.addEventListener('click', function() {
+                document.getElementById('mobileNav').style.display = 'none';
+            });
+        });
+
+        // Highlight active section in table of contents
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('section[id]');
+            const tocLinks = document.querySelectorAll('.toc-links a, .sidebar-links a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            tocLinks.forEach(link => {
+                link.style.color = '#cccccc';
+                if (link.getAttribute('href') === '#' + current) {
+                    link.style.color = '#ffffff';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
