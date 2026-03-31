@@ -2,11 +2,31 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Footer } from './Footer';
 import { NetworkBackground } from './NetworkBackground';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Menu } from 'lucide-react';
 
 export function Layout() {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const location = useLocation();
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
+  }, [location.pathname]);
 
   return (
     <div style={{ backgroundColor: '#ffffff', color: '#000000', minHeight: '100vh', position: 'relative' }}>
@@ -46,31 +66,37 @@ export function Layout() {
         }} />
       </div>
 
+      {/* Mobile Header */}
+      <div className="mobile-header">
+        <div className="mobile-header-logo">
+          <img src="/icon-512.webp" alt="Lupyd Logo" />
+          <span>Lupyd</span>
+        </div>
+        <button 
+          onClick={() => setSidebarOpen(true)}
+          style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0.4rem', color: '#000', display: 'flex' }}
+        >
+          <Menu size={26} strokeWidth={2.5} />
+        </button>
+      </div>
+
+      {/* Mobile Overlay */}
+      <div 
+        className={`mobile-overlay ${isSidebarOpen ? 'active' : ''}`} 
+        onClick={() => setSidebarOpen(false)}
+      />
+
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setSidebarOpen(!isSidebarOpen)} />
       
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        minHeight: '100vh',
-        marginLeft: isSidebarOpen ? '280px' : '70px',
-        transition: 'margin-left 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-        position: 'relative',
-        zIndex: 1 // Keep main content stacked completely above the background
-      }}>
-        <main style={{ 
-          flex: 1, 
-          padding: '4rem 6rem', 
-          width: '100%', 
-          maxWidth: '1100px',
-          margin: '0 auto',
-        }}>
+      <div className={`layout-wrapper ${!isSidebarOpen ? 'sidebar-closed' : ''}`}>
+        <main className="main-content">
           {/* Fading animation trigger on route change */}
           <div key={location.pathname} style={{ animation: 'contentFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
             <Outlet />
           </div>
         </main>
         
-        <div style={{ padding: '0 6rem', maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
+        <div className="footer-wrapper">
           <Footer />
         </div>
       </div>

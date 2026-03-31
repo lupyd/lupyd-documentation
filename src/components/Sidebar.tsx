@@ -30,20 +30,7 @@ export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSide
   const [searchFocused, setSearchFocused] = useState(false);
 
   return (
-    <aside style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: isOpen ? '280px' : '70px',
-      height: '100vh',
-      backgroundColor: '#ffffff',
-      borderRight: '1px solid #eaeaea',
-      transition: 'width 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-      display: 'flex',
-      flexDirection: 'column',
-      zIndex: 100,
-      overflow: 'hidden'
-    }}>
+    <aside className={`sidebar-container ${!isOpen ? 'sidebar-closed' : ''} ${isOpen ? 'mobile-open' : ''}`}>
       {/* Header / Logo */}
       <div style={{
         height: '70px',
@@ -156,7 +143,7 @@ export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSide
         display: 'flex',
         justifyContent: isOpen ? 'flex-end' : 'center',
         backgroundColor: '#fafafa'
-      }}>
+      }} className="sidebar-toggle-btn-container">
         <button 
           onClick={toggleSidebar}
           className="sidebar-toggle-btn"
