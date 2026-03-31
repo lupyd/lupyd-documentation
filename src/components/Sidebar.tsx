@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   Search, PanelLeftClose, PanelLeft, Book, Rocket, Layers, 
   Code2, Briefcase, Settings, Map,
-  TrendingUp, MessageSquare, Library
+  TrendingUp, MessageSquare, Library, Terminal, Database, ArrowRight
 } from 'lucide-react';
 
 interface NavItem {
@@ -23,11 +23,50 @@ const navSections: NavItem[] = [
   { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
   { id: 'guides', label: 'Platform Guides', icon: Map, path: '/guides' },
   { id: 'groups', label: 'Group Chats', icon: MessageSquare, path: '/groups' },
+  { id: 'firefly', label: 'Firefly Endpoints', icon: Terminal, path: '/firefly' },
+  { id: 'server-api', label: 'Social Graph API', icon: Database, path: '/server-api' },
   { id: 'docs-support', label: 'Docs & Support', icon: Library, path: '/docs-support' },
+];
+
+const SEARCH_INDEX = [
+  { title: 'Introduction', path: '/', tags: ['home', 'overview', 'about', 'welcome'] },
+  { title: 'Getting Started', path: '/installation', tags: ['install', 'download', 'app', 'android', 'ios', 'setup'] },
+  { title: 'Developer Docs', path: '/guide', tags: ['dev', 'documentation', 'api', 'code', 'structure'] },
+  { title: 'Core Features', path: '/features', tags: ['privacy', 'groups', 'encryption', 'monetization', 'security'] },
+  { title: 'Start Fast & Go Viral', path: '/start-fast', tags: ['community', 'growth', 'trending', 'viral', 'audience'] },
+  { title: 'Use Cases', path: '/cases', tags: ['b2b', 'b2c', 'business', 'creators', 'enterprise'] },
+  { title: 'Settings & Security', path: '/settings', tags: ['config', 'privacy', 'account', 'profile'] },
+  { title: 'Platform Guides', path: '/guides', tags: ['tutorial', 'how-to', 'platform', 'guide'] },
+  { title: 'Group Chats Dashboard', path: '/groups', tags: ['messaging', 'e2ee', 'chat', 'secure'] },
+  { title: 'Firefly Native Protocol', path: '/firefly', tags: ['firefly', 'backend', 'mls', 'encryption', 'api', 'keys', 'auth', 'websocket', 'relayer'] },
+  { title: 'Social Graph Rust Server', path: '/server-api', tags: ['rust', 'server', 'post', 'followers', 'timeline', 'database', 'api', 'hashtags', 'votes'] },
+  { title: 'Docs & Support', path: '/docs-support', tags: ['help', 'contact', 'support', 'faq'] },
 ];
 
 export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSidebar: () => void }) {
   const [searchFocused, setSearchFocused] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+
+  // Listen for Cmd+K or Ctrl+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        if (!isOpen) toggleSidebar();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, toggleSidebar]);
+
+  const filteredResults = SEARCH_INDEX.filter(item => {
+    const q = searchQuery.toLowerCase();
+    if (!q) return false;
+    return item.title.toLowerCase().includes(q) || item.tags.some(tag => tag.toLowerCase().includes(q));
+  }).slice(0, 5); // display top 5
 
   return (
     <aside className={`sidebar-container ${!isOpen ? 'sidebar-closed' : ''} ${isOpen ? 'mobile-open' : ''}`}>
@@ -62,13 +101,19 @@ export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSide
             <Search 
               size={16} 
               color={searchFocused ? '#000' : '#888'} 
-              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', transition: 'color 0.2s ease' }} 
+              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', transition: 'color 0.2s ease', zIndex: 2 }} 
             />
             <input 
+              ref={searchInputRef}
               type="text" 
               placeholder="Search documentation..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
+              onBlur={() => {
+                // small delay so we can click results before blur hides them
+                setTimeout(() => setSearchFocused(false), 200);
+              }}
               style={{
                 width: '100%',
                 padding: '0.6rem 1rem 0.6rem 2.5rem',
@@ -79,7 +124,9 @@ export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSide
                 outline: 'none',
                 boxShadow: searchFocused ? '0 0 0 2px rgba(0,0,0,0.05)' : 'none',
                 transition: 'all 0.2s ease',
-                backgroundColor: searchFocused ? '#fff' : '#fafafa'
+                backgroundColor: searchFocused ? '#fff' : '#fafafa',
+                position: 'relative',
+                zIndex: 1
               }}
             />
             <div style={{
@@ -94,8 +141,63 @@ export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSide
               borderRadius: '4px',
               padding: '2px 6px',
               pointerEvents: 'none',
-              fontWeight: 600
+              fontWeight: 600,
+              zIndex: 2,
+              display: searchQuery.length > 0 ? 'none' : 'block'
             }}>⌘K</div>
+
+            {/* Search Dropdown */}
+            {searchFocused && searchQuery.length > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: 'calc(100% + 8px)',
+                left: 0,
+                width: '100%',
+                backgroundColor: '#ffffff',
+                border: '1px solid #eaeaea',
+                borderRadius: '8px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                zIndex: 100,
+                maxHeight: '300px',
+                overflowY: 'auto'
+              }}>
+                {filteredResults.length > 0 ? (
+                  <div style={{ padding: '0.5rem' }}>
+                    {filteredResults.map((result, idx) => (
+                      <div 
+                        key={idx}
+                        onClick={() => {
+                          navigate(result.path);
+                          setSearchQuery('');
+                          setSearchFocused(false);
+                          if (window.innerWidth <= 768) {
+                            toggleSidebar();
+                          }
+                        }}
+                        style={{
+                          padding: '0.75rem',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fafafa'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#000' }}>{result.title}</span>
+                        <ArrowRight size={14} color="#888" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem', color: '#888' }}>
+                    No matching documents found.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <button style={{
@@ -104,7 +206,7 @@ export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSide
             padding: '0.5rem',
             cursor: 'pointer',
             borderRadius: '8px'
-          }} className="sidebar-icon-btn">
+          }} className="sidebar-icon-btn" onClick={() => toggleSidebar()}>
             <Search size={22} color="#555" />
           </button>
         )}

@@ -12,6 +12,8 @@ import { Settings } from './pages/Settings';
 import { PlatformGuides } from './pages/PlatformGuides';
 import { GroupChats } from './pages/GroupChats';
 import { DocsSupport } from './pages/DocsSupport';
+import { FireflyApi } from './pages/FireflyApi';
+import { LupydServerApi } from './pages/LupydServerApi';
 import { IntroScreen } from './components/IntroScreen';
 
 function App() {
@@ -32,6 +34,8 @@ function App() {
             <Route path="settings" element={<Settings />} />
             <Route path="guides" element={<PlatformGuides />} />
             <Route path="groups" element={<GroupChats />} />
+            <Route path="firefly" element={<FireflyApi />} />
+            <Route path="server-api" element={<LupydServerApi />} />
             <Route path="docs-support" element={<DocsSupport />} />
           </Route>
         </Routes>
