@@ -1,4 +1,4 @@
-import { Server, MessageSquareHeart, UserCheck, Bell, Compass, Database, FileCode2, Activity, Globe } from 'lucide-react';
+import { Server, MessageSquareHeart, UserCheck, Bell, Compass,  FileCode2, Activity, Globe } from 'lucide-react';
 
 export function LupydServerApi() {
   const categories = [
