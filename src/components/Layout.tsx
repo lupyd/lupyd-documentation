@@ -4,10 +4,54 @@ import { Footer } from './Footer';
 import { NetworkBackground } from './NetworkBackground';
 import { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
+import { seoData } from '../seoData';
 
 export function Layout() {
   const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const location = useLocation();
+
+  // Dynamic SEO handler for routing
+  useEffect(() => {
+    const path = location.pathname;
+    const data = seoData[path];
+
+    if (data) {
+      // 1. Dynamic Title Injection
+      document.title = data.title;
+
+      // 2. Dynamic Meta Description Injection
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+      }
+      metaDesc.setAttribute('content', data.description);
+
+      // 3. Dynamic JSON-LD Schema Injection
+      // Clean previous dynamic schemas first
+      const existingSchemas = document.querySelectorAll('script[data-seo="dynamic"]');
+      existingSchemas.forEach(el => el.remove());
+
+      // Append new schemas
+      data.schemas.forEach(schema => {
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.setAttribute('data-seo', 'dynamic');
+        script.textContent = JSON.stringify(schema);
+        document.head.appendChild(script);
+      });
+    } else {
+      // Fallback defaults
+      document.title = "Lupyd Documentation";
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute('content', "Lupyd promises security, data privacy, and a new social media experience to users and businesses alike.");
+      }
+      const existingSchemas = document.querySelectorAll('script[data-seo="dynamic"]');
+      existingSchemas.forEach(el => el.remove());
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleResize = () => {
