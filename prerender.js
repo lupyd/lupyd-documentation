@@ -137,6 +137,28 @@ async function run() {
     console.log(`Saved: ${path.join(outDir, 'index.html')}`);
   }
 
+  // 4. Generate sitemap.xml dynamically
+  console.log('Generating sitemap.xml...');
+  const baseUrl = 'https://docs.lupyd.com';
+  const today = new Date().toISOString().split('T')[0];
+
+  const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${routes.map(r => {
+  const pageUrl = r === '/' ? `${baseUrl}/` : `${baseUrl}${r}/`;
+  const priority = r === '/' ? '1.0' : (r === '/guide' || r === '/firefly' || r === '/server-api' ? '0.9' : '0.8');
+  return `  <url>
+    <loc>${pageUrl}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>${priority}</priority>
+  </url>`;
+}).join('\n')}
+</urlset>`;
+
+  fs.writeFileSync(path.resolve(__dirname, 'dist/sitemap.xml'), sitemapXml, 'utf-8');
+  console.log(`Saved sitemap.xml: ${path.resolve(__dirname, 'dist/sitemap.xml')}`);
+
   // Clean up dist-server temporary directory after build
   fs.rmSync(path.resolve(__dirname, 'dist-server'), { recursive: true, force: true });
 
