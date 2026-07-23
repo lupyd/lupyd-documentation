@@ -32,8 +32,8 @@ export const seoData: Record<string, PageSeo> = {
     ]
   },
   "/installation": {
-    title: "Install Lupyd on Linux & Mobile - Lupyd Developer Docs",
-    description: "Learn how to install Lupyd on Windows, Linux, Android, and iOS devices with our unified onboarding experience and terminal-based commands. Get started.",
+    title: "Install Lupyd on Mobile & Desktop - Lupyd Developer Docs",
+    description: "Learn how to install Lupyd on Windows, Linux, Android, and iOS devices with our unified onboarding experience. Get started.",
     schemas: [
       {
         "@context": "https://schema.org",
@@ -319,13 +319,13 @@ export const seoData: Record<string, PageSeo> = {
   },
   "/guides": {
     title: "Lupyd Platform Guides - Step-by-Step Tutorials",
-    description: "Read comprehensive tutorials and how-to guides for using Lupyd across desktop, mobile, and terminal environments with ease. Read now.",
+    description: "Read comprehensive tutorials and how-to guides for using Lupyd across desktop and mobile platforms with ease. Read now.",
     schemas: [
       {
         "@context": "https://schema.org",
         "@type": "TechArticle",
         "headline": "Lupyd Platform Guides",
-        "description": "Read comprehensive tutorials and how-to guides for using Lupyd across desktop, mobile, and terminal environments with ease.",
+        "description": "Read comprehensive tutorials and how-to guides for using Lupyd across desktop and mobile platforms with ease.",
         "inLanguage": "en",
         "mainEntityOfPage": "https://docs.lupyd.com/guides"
       },
@@ -522,7 +522,7 @@ export const seoData: Record<string, PageSeo> = {
             "name": "Is Lupyd available on all devices?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes. Lupyd works seamlessly across mobile (iOS/Android), desktop, and Linux terminal setups."
+              "text": "Yes. Lupyd works seamlessly across mobile (iOS/Android) and desktop platforms."
             }
           },
           {

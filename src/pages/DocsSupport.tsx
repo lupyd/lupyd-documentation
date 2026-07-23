@@ -23,7 +23,7 @@ export function DocsSupport() {
       category: "Features & Usage",
       items: [
         { q: "Can I use Lupyd for business purposes?", a: "Yes. Lupyd supports both individual users and businesses (B2B & B2C)." },
-        { q: "Is Lupyd available on all devices?", a: "Yes. Lupyd works seamlessly across mobile (iOS/Android), desktop, and Linux terminal setups." },
+        { q: "Is Lupyd available on all devices?", a: "Yes. Lupyd works seamlessly across mobile (iOS/Android) and desktop platforms." },
         { q: "Does Lupyd compress my uploaded media?", a: "Lupyd utilizes intelligent compression to guarantee fast delivery speeds but provides high-fidelity options within Chat Settings for professional creators." }
       ]
     }

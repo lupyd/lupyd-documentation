@@ -63,7 +63,7 @@ export function Home() {
         Next Steps
       </h2>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '4rem' }}>
-        <Link to="/installation" className="doc-card">
+        <Link to="/installation/" className="doc-card">
           <Box size={24} className="doc-card-icon" />
           <h3 style={{ margin: '1rem 0 0.5rem', fontSize: '1.1rem', fontWeight: 600 }}>Getting Started</h3>
           <p style={{ color: '#666666', fontSize: '0.95rem', margin: 0, lineHeight: 1.5 }}>
@@ -72,7 +72,7 @@ export function Home() {
           <div className="doc-card-arrow"><ArrowRight size={18} /></div>
         </Link>
         
-        <Link to="/features" className="doc-card">
+        <Link to="/features/" className="doc-card">
           <Zap size={24} className="doc-card-icon" />
           <h3 style={{ margin: '1rem 0 0.5rem', fontSize: '1.1rem', fontWeight: 600 }}>Core Features</h3>
           <p style={{ color: '#666666', fontSize: '0.95rem', margin: 0, lineHeight: 1.5 }}>

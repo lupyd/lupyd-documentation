@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IntroScreen } from '../components/IntroScreen';
-import { Download, Smartphone, Monitor, TerminalSquare, Compass, Bell, ShieldCheck, RefreshCw, AlertCircle } from 'lucide-react';
+import { Download, Smartphone, Monitor, Compass, Bell, ShieldCheck, RefreshCw, AlertCircle } from 'lucide-react';
 
 export function PlatformGuides() {
   const navigate = useNavigate();
@@ -81,7 +81,7 @@ export function PlatformGuides() {
             <Compass size={24} color="#000000" /> Overview
           </h2>
           <p style={{ fontSize: '1.1rem', color: '#555555', lineHeight: 1.6, margin: 0 }}>
-            Lupyd is built to deliver a consistent and secure experience across all platforms. Whether accessed on mobile, desktop, or Linux systems, users can interact with the same core features with optimized performance and seamless navigation.
+            Lupyd is built to deliver a consistent and secure experience across all platforms. Whether accessed on mobile or desktop platforms, users can interact with the same core features with optimized performance and seamless navigation.
           </p>
         </div>
 
@@ -138,22 +138,7 @@ export function PlatformGuides() {
             </ul>
           </div>
 
-          {/* Linux / Terminal Access */}
-          <div style={{ backgroundColor: '#111111', color: '#ffffff', border: '1px solid #111111', borderRadius: '12px', padding: '2rem', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ fontSize: '1.4rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: '#ffffff' }}>
-              <TerminalSquare size={24} color="#ffffff" /> Linux / Terminal
-            </h3>
-            <p style={{ fontSize: '0.9rem', color: '#888888', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.5rem' }}>Installation</p>
-            <ul style={{ margin: '0 0 1.5rem 0', paddingLeft: '1.5rem', color: '#dddddd', lineHeight: 1.6 }}>
-              <li>Install Lupyd using terminal commands</li>
-              <li>Launch directly from command line</li>
-            </ul>
-            <p style={{ fontSize: '0.9rem', color: '#888888', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.5rem' }}>Usage</p>
-            <ul style={{ margin: 0, paddingLeft: '1.5rem', color: '#dddddd', lineHeight: 1.6 }}>
-              <li>Lightweight and efficient performance</li>
-              <li>Suitable for advanced users and developers</li>
-            </ul>
-          </div>
+
         </div>
 
         <hr style={{ border: 'none', borderTop: '1px solid #eaeaea', margin: '4rem 0' }} />

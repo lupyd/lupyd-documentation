@@ -24,7 +24,7 @@ export function Navigation() {
           fontSize: '1.25rem',
           letterSpacing: '-0.025em'
         }}>
-          <img src="/icon-512.webp" alt="Lupyd Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+          <img src="/icon-round.svg" alt="Lupyd Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
           <span>Lupyd</span>
         </Link>
         <nav style={{

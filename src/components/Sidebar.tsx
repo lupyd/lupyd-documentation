@@ -15,32 +15,32 @@ interface NavItem {
 
 const navSections: NavItem[] = [
   { id: 'intro', label: 'Introduction', icon: Book, path: '/' },
-  { id: 'start', label: 'Getting Started', icon: Rocket, path: '/installation' },
-  { id: 'dev', label: 'Developer Docs', icon: Code2, path: '/guide' },
-  { id: 'features', label: 'Core Features', icon: Layers, path: '/features' },
-  { id: 'start-fast', label: 'Start Fast & Go Viral', icon: TrendingUp, path: '/start-fast' },
-  { id: 'cases', label: 'Use Cases', icon: Briefcase, path: '/cases' },
-  { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
-  { id: 'guides', label: 'Platform Guides', icon: Map, path: '/guides' },
-  { id: 'groups', label: 'Group Chats', icon: MessageSquare, path: '/groups' },
-  { id: 'firefly', label: 'Firefly Endpoints', icon: Terminal, path: '/firefly' },
-  { id: 'server-api', label: 'Social Graph API', icon: Database, path: '/server-api' },
-  { id: 'docs-support', label: 'Docs & Support', icon: Library, path: '/docs-support' },
+  { id: 'start', label: 'Getting Started', icon: Rocket, path: '/installation/' },
+  { id: 'dev', label: 'Developer Docs', icon: Code2, path: '/guide/' },
+  { id: 'features', label: 'Core Features', icon: Layers, path: '/features/' },
+  { id: 'start-fast', label: 'Start Fast & Go Viral', icon: TrendingUp, path: '/start-fast/' },
+  { id: 'cases', label: 'Use Cases', icon: Briefcase, path: '/cases/' },
+  { id: 'settings', label: 'Settings', icon: Settings, path: '/settings/' },
+  { id: 'guides', label: 'Platform Guides', icon: Map, path: '/guides/' },
+  { id: 'groups', label: 'Group Chats', icon: MessageSquare, path: '/groups/' },
+  { id: 'firefly', label: 'Firefly Endpoints', icon: Terminal, path: '/firefly/' },
+  { id: 'server-api', label: 'Social Graph API', icon: Database, path: '/server-api/' },
+  { id: 'docs-support', label: 'Docs & Support', icon: Library, path: '/docs-support/' },
 ];
 
 const SEARCH_INDEX = [
   { title: 'Introduction', path: '/', tags: ['home', 'overview', 'about', 'welcome'] },
-  { title: 'Getting Started', path: '/installation', tags: ['install', 'download', 'app', 'android', 'ios', 'setup'] },
-  { title: 'Developer Docs', path: '/guide', tags: ['dev', 'documentation', 'api', 'code', 'structure'] },
-  { title: 'Core Features', path: '/features', tags: ['privacy', 'groups', 'encryption', 'monetization', 'security'] },
-  { title: 'Start Fast & Go Viral', path: '/start-fast', tags: ['community', 'growth', 'trending', 'viral', 'audience'] },
-  { title: 'Use Cases', path: '/cases', tags: ['b2b', 'b2c', 'business', 'creators', 'enterprise'] },
-  { title: 'Settings & Security', path: '/settings', tags: ['config', 'privacy', 'account', 'profile'] },
-  { title: 'Platform Guides', path: '/guides', tags: ['tutorial', 'how-to', 'platform', 'guide'] },
-  { title: 'Group Chats Dashboard', path: '/groups', tags: ['messaging', 'e2ee', 'chat', 'secure'] },
-  { title: 'Firefly Native Protocol', path: '/firefly', tags: ['firefly', 'backend', 'mls', 'encryption', 'api', 'keys', 'auth', 'websocket', 'relayer'] },
-  { title: 'Social Graph Rust Server', path: '/server-api', tags: ['rust', 'server', 'post', 'followers', 'timeline', 'database', 'api', 'hashtags', 'votes'] },
-  { title: 'Docs & Support', path: '/docs-support', tags: ['help', 'contact', 'support', 'faq'] },
+  { title: 'Getting Started', path: '/installation/', tags: ['install', 'download', 'app', 'android', 'ios', 'setup'] },
+  { title: 'Developer Docs', path: '/guide/', tags: ['dev', 'documentation', 'api', 'code', 'structure'] },
+  { title: 'Core Features', path: '/features/', tags: ['privacy', 'groups', 'encryption', 'monetization', 'security'] },
+  { title: 'Start Fast & Go Viral', path: '/start-fast/', tags: ['community', 'growth', 'trending', 'viral', 'audience'] },
+  { title: 'Use Cases', path: '/cases/', tags: ['b2b', 'b2c', 'business', 'creators', 'enterprise'] },
+  { title: 'Settings & Security', path: '/settings/', tags: ['config', 'privacy', 'account', 'profile'] },
+  { title: 'Platform Guides', path: '/guides/', tags: ['tutorial', 'how-to', 'platform', 'guide'] },
+  { title: 'Group Chats Dashboard', path: '/groups/', tags: ['messaging', 'e2ee', 'chat', 'secure'] },
+  { title: 'Firefly Native Protocol', path: '/firefly/', tags: ['firefly', 'backend', 'mls', 'encryption', 'api', 'keys', 'auth', 'websocket', 'relayer'] },
+  { title: 'Social Graph Rust Server', path: '/server-api/', tags: ['rust', 'server', 'post', 'followers', 'timeline', 'database', 'api', 'hashtags', 'votes'] },
+  { title: 'Docs & Support', path: '/docs-support/', tags: ['help', 'contact', 'support', 'faq'] },
 ];
 
 export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSidebar: () => void }) {
@@ -82,12 +82,12 @@ export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSide
       }}>
         {isOpen && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <img src="/icon-512.webp" alt="Lupyd Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+            <img src="/icon-round.svg" alt="Lupyd Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
             <span style={{ fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em', color: '#000' }}>Lupyd</span>
           </div>
         )}
         {!isOpen && (
-          <img src="/icon-512.webp" alt="Lupyd Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+          <img src="/icon-round.svg" alt="Lupyd Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
         )}
       </div>
 

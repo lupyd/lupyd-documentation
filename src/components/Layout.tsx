@@ -7,12 +7,19 @@ import { Menu } from 'lucide-react';
 import { seoData } from '../seoData';
 
 export function Layout() {
-  const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+  const [isSidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth > 768;
+    }
+    return true; // Default open on server for SEO visibility
+  });
   const location = useLocation();
 
   // Dynamic SEO handler for routing
   useEffect(() => {
-    const path = location.pathname;
+    const path = location.pathname.endsWith('/') && location.pathname !== '/' 
+      ? location.pathname.slice(0, -1) 
+      : location.pathname;
     const data = seoData[path];
 
     if (data) {
@@ -113,7 +120,7 @@ export function Layout() {
       {/* Mobile Header */}
       <div className="mobile-header">
         <div className="mobile-header-logo">
-          <img src="/icon-512.webp" alt="Lupyd Logo" />
+          <img src="/icon-round.svg" alt="Lupyd Logo" />
           <span>Lupyd</span>
         </div>
         <button 

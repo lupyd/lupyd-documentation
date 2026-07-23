@@ -110,7 +110,7 @@ export function IntroScreen({ onComplete, title = "Lupyd", subtitle = "System Do
           filter: 'drop-shadow(0px 12px 24px rgba(0,0,0,0.08))' 
         }}>
           <img 
-            src="/icon-512.webp" 
+            src="/icon-round.svg" 
             alt="Lupyd Logo" 
             style={{ 
               width: '5vw', 

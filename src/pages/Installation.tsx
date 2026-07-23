@@ -1,4 +1,4 @@
-import { Terminal, Copy, CheckCircle2 } from 'lucide-react';
+import { Download, CheckCircle2 } from 'lucide-react';
 
 export function Installation() {
   return (
@@ -63,54 +63,63 @@ export function Installation() {
 
       <section style={{ marginBottom: '4rem' }}>
         <h2 style={{ fontSize: '24px', fontWeight: 600, letterSpacing: '-0.01em', marginBottom: '1.5rem', color: '#000000', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Terminal size={24} color="#000000" />
-          Terminal-Based Installation
+          <Download size={24} color="#000000" />
+          Download Lupyd
         </h2>
         <p style={{ fontSize: '1.1rem', color: '#444444', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-          For users who prefer a terminal-based setup (Linux / Advanced Users), Lupyd can be installed using simple commands:
+          Lupyd is available for download across multiple platforms. You can download the official client directly from the downloads page:
         </p>
         
         <div style={{
-          backgroundColor: '#111111',
-          borderRadius: '8px',
-          overflow: 'hidden',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+          backgroundColor: '#fafafa',
+          border: '1px solid #eaeaea',
+          borderRadius: '12px',
+          padding: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          gap: '1.5rem',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.02)'
         }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between',
-            backgroundColor: '#222222',
-            padding: '0.75rem 1.25rem',
-            borderBottom: '1px solid #333333'
-          }}>
-            <span style={{ color: '#888888', fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Bash</span>
-            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888888' }} title="Copy to clipboard">
-              <Copy size={16} />
-            </button>
+          <div>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, margin: '0 0 0.5rem 0', color: '#111111' }}>
+              Official Downloads
+            </h3>
+            <p style={{ fontSize: '0.95rem', color: '#666666', margin: 0, lineHeight: 1.5 }}>
+              Enjoy secure communications, content creation, and business tools under end-to-end encryption.
+            </p>
           </div>
-          <pre style={{ 
-            margin: 0, 
-            padding: '1.5rem', 
-            overflowX: 'auto',
-            color: '#f8f8f2',
-            fontSize: '0.95rem',
-            lineHeight: 1.6,
-            fontFamily: 'monospace'
-          }}>
-            <code>
-<span style={{ color: '#888888' }}># Update system packages</span><br/>
-<span style={{ color: '#ff79c6' }}>sudo</span> apt update<br/><br/>
-<span style={{ color: '#888888' }}># Download Lupyd package (example)</span><br/>
-<span style={{ color: '#ff79c6' }}>wget</span> https://lupyd.com/download/lupyd.deb<br/><br/>
-<span style={{ color: '#888888' }}># Install Lupyd</span><br/>
-<span style={{ color: '#ff79c6' }}>sudo</span> dpkg -i lupyd.deb<br/><br/>
-<span style={{ color: '#888888' }}># Fix dependencies (if required)</span><br/>
-<span style={{ color: '#ff79c6' }}>sudo</span> apt-get install -f<br/><br/>
-<span style={{ color: '#888888' }}># Launch Lupyd</span><br/>
-lupyd
-            </code>
-          </pre>
+          
+          <a 
+            href="https://www.lupyd.com/downloads" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              backgroundColor: '#000000',
+              color: '#ffffff',
+              padding: '0.75rem 1.5rem',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontWeight: 600,
+              fontSize: '1.05rem',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.backgroundColor = '#222222';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'none';
+              e.currentTarget.style.backgroundColor = '#000000';
+            }}
+          >
+            <Download size={20} color="#ffffff" />
+            Go to Downloads Page
+          </a>
         </div>
       </section>
 
@@ -120,7 +129,7 @@ lupyd
             Cross-Platform Consistency
           </h3>
           <p style={{ fontSize: '1.05rem', color: '#555555', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-            Whether you’re using mobile, desktop, or terminal, Lupyd delivers the same seamless experience:
+            Whether you’re using mobile or desktop, Lupyd delivers the same seamless experience:
           </p>
           <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <li style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.05rem', color: '#111111', fontWeight: 500 }}>
