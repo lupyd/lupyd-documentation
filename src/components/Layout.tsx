@@ -120,7 +120,7 @@ export function Layout() {
       {/* Mobile Header */}
       <div className="mobile-header">
         <div className="mobile-header-logo">
-          <img src="/icon-round.svg" alt="Lupyd Logo" />
+          <img src="/favicon.svg" alt="Lupyd Logo" />
           <span>Lupyd</span>
         </div>
         <button 

@@ -82,12 +82,12 @@ export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSide
       }}>
         {isOpen && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <img src="/icon-round.svg" alt="Lupyd Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+            <img src="/favicon.svg" alt="Lupyd Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
             <span style={{ fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em', color: '#000' }}>Lupyd</span>
           </div>
         )}
         {!isOpen && (
-          <img src="/icon-round.svg" alt="Lupyd Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+          <img src="/favicon.svg" alt="Lupyd Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
         )}
       </div>
 
