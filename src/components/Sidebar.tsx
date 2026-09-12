@@ -3,7 +3,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   Search, PanelLeftClose, PanelLeft, Book, Rocket, Layers, 
   Code2, Briefcase, Settings, Map,
-  TrendingUp, MessageSquare, Library, Terminal, Database, ArrowRight
+  TrendingUp, MessageSquare, Library, Terminal, Database, ArrowRight,
+  ExternalLink, Newspaper, Info, CreditCard
 } from 'lucide-react';
 
 interface NavItem {
@@ -11,6 +12,13 @@ interface NavItem {
   label: string;
   icon: React.ElementType;
   path: string;
+}
+
+interface ExternalNavItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  url: string;
 }
 
 const navSections: NavItem[] = [
@@ -28,6 +36,12 @@ const navSections: NavItem[] = [
   { id: 'docs-support', label: 'Docs & Support', icon: Library, path: '/docs-support/' },
 ];
 
+const externalLinks: ExternalNavItem[] = [
+  { id: 'blogs', label: 'Blogs', icon: Newspaper, url: 'https://blogs.lupyd.com' },
+  { id: 'about', label: 'About', icon: Info, url: 'https://about.lupyd.com' },
+  { id: 'pricing', label: 'Pricing', icon: CreditCard, url: 'https://billing.lupyd.com' },
+];
+
 const SEARCH_INDEX = [
   { title: 'Introduction', path: '/', tags: ['home', 'overview', 'about', 'welcome'] },
   { title: 'Getting Started', path: '/installation/', tags: ['install', 'download', 'app', 'android', 'ios', 'setup'] },
@@ -41,6 +55,9 @@ const SEARCH_INDEX = [
   { title: 'Firefly Native Protocol', path: '/firefly/', tags: ['firefly', 'backend', 'mls', 'encryption', 'api', 'keys', 'auth', 'websocket', 'relayer'] },
   { title: 'Social Graph Rust Server', path: '/server-api/', tags: ['rust', 'server', 'post', 'followers', 'timeline', 'database', 'api', 'hashtags', 'votes'] },
   { title: 'Docs & Support', path: '/docs-support/', tags: ['help', 'contact', 'support', 'faq'] },
+  { title: 'Blogs', path: 'https://blogs.lupyd.com', external: true, tags: ['blog', 'articles', 'news', 'posts', 'updates'] },
+  { title: 'About Lupyd', path: 'https://about.lupyd.com', external: true, tags: ['about', 'company', 'team', 'mission'] },
+  { title: 'Pricing & Billing', path: 'https://billing.lupyd.com', external: true, tags: ['pricing', 'billing', 'plans', 'cost', 'subscription'] },
 ];
 
 export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSidebar: () => void }) {
@@ -167,7 +184,11 @@ export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSide
                       <div 
                         key={idx}
                         onClick={() => {
-                          navigate(result.path);
+                          if ((result as { external?: boolean }).external) {
+                            window.open(result.path, '_blank', 'noopener,noreferrer');
+                          } else {
+                            navigate(result.path);
+                          }
                           setSearchQuery('');
                           setSearchFocused(false);
                           if (window.innerWidth <= 768) {
@@ -186,8 +207,19 @@ export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSide
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fafafa'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
-                        <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#000' }}>{result.title}</span>
-                        <ArrowRight size={14} color="#888" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.9rem', fontWeight: 500, color: '#000' }}>{result.title}</span>
+                          {(result as { external?: boolean }).external && (
+                            <span style={{ fontSize: '0.65rem', padding: '1px 5px', borderRadius: '4px', backgroundColor: '#f0f0f0', color: '#666', fontWeight: 600 }}>
+                              External
+                            </span>
+                          )}
+                        </div>
+                        {(result as { external?: boolean }).external ? (
+                          <ExternalLink size={14} color="#888" />
+                        ) : (
+                          <ArrowRight size={14} color="#888" />
+                        )}
                       </div>
                     ))}
                   </div>
@@ -236,6 +268,54 @@ export function Sidebar({ isOpen, toggleSidebar }: { isOpen: boolean, toggleSide
             </NavLink>
           );
         })}
+
+        {/* External Links Section */}
+        <div style={{
+          margin: isOpen ? '1rem 0 0.25rem' : '1rem 0 0.25rem',
+          paddingTop: '0.75rem',
+          borderTop: '1px solid #eaeaea',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.25rem'
+        }}>
+          {isOpen && (
+            <div style={{
+              padding: '0 0.75rem 0.5rem',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              color: '#888'
+            }}>
+              Lupyd Ecosystem
+            </div>
+          )}
+          {externalLinks.map((item) => {
+            const Icon = item.icon;
+            return (
+              <a
+                key={item.id}
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`sidebar-link ${!isOpen ? 'collapsed' : ''}`}
+                title={!isOpen ? `${item.label} (external)` : undefined}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: isOpen ? 'space-between' : 'center',
+                  textDecoration: 'none'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <Icon size={18} className="sidebar-link-icon" />
+                  {isOpen && <span>{item.label}</span>}
+                </div>
+                {isOpen && <ExternalLink size={13} style={{ opacity: 0.45 }} />}
+              </a>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Toggle Button */}

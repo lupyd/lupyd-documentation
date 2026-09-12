@@ -3,7 +3,7 @@ import { Sidebar } from './Sidebar';
 import { Footer } from './Footer';
 import { NetworkBackground } from './NetworkBackground';
 import { useState, useEffect } from 'react';
-import { Menu } from 'lucide-react';
+import { Menu, ExternalLink } from 'lucide-react';
 import { seoData } from '../seoData';
 
 export function Layout() {
@@ -123,12 +123,31 @@ export function Layout() {
           <img src="/favicon.svg" alt="Lupyd Logo" />
           <span>Lupyd</span>
         </div>
-        <button 
-          onClick={() => setSidebarOpen(true)}
-          style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0.4rem', color: '#000', display: 'flex' }}
-        >
-          <Menu size={26} strokeWidth={2.5} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
+          <a 
+            href="https://blogs.lupyd.com" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            style={{ fontSize: '0.85rem', fontWeight: 500, color: '#444', textDecoration: 'none' }}
+          >
+            Blogs
+          </a>
+          <a 
+            href="https://billing.lupyd.com" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            style={{ fontSize: '0.85rem', fontWeight: 500, color: '#444', textDecoration: 'none' }}
+          >
+            Pricing
+          </a>
+          <button 
+            onClick={() => setSidebarOpen(true)}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0.4rem', color: '#000', display: 'flex' }}
+            aria-label="Open Navigation Menu"
+          >
+            <Menu size={26} strokeWidth={2.5} />
+          </button>
+        </div>
       </div>
 
       {/* Mobile Overlay */}
@@ -140,6 +159,44 @@ export function Layout() {
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setSidebarOpen(!isSidebarOpen)} />
       
       <div className={`layout-wrapper ${!isSidebarOpen ? 'sidebar-closed' : ''}`}>
+        {/* Desktop Header */}
+        <header className="desktop-header">
+          <div className="desktop-header-content">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#888', fontSize: '0.85rem', fontWeight: 500 }}>
+              <span style={{ color: '#111', fontWeight: 600 }}>Documentation</span>
+            </div>
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '1.75rem', fontSize: '0.9rem', fontWeight: 500 }}>
+              <a 
+                href="https://blogs.lupyd.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="header-nav-link"
+              >
+                <span>Blogs</span>
+                <ExternalLink size={12} style={{ opacity: 0.6 }} />
+              </a>
+              <a 
+                href="https://about.lupyd.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="header-nav-link"
+              >
+                <span>About</span>
+                <ExternalLink size={12} style={{ opacity: 0.6 }} />
+              </a>
+              <a 
+                href="https://billing.lupyd.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="header-nav-link"
+              >
+                <span>Pricing</span>
+                <ExternalLink size={12} style={{ opacity: 0.6 }} />
+              </a>
+            </nav>
+          </div>
+        </header>
+
         <main className="main-content">
           {/* Fading animation trigger on route change */}
           <div key={location.pathname} style={{ animation: 'contentFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
