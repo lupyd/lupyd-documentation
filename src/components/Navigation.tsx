@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ExternalLink } from 'lucide-react';
 
 export function Navigation() {
   return (
@@ -19,7 +20,7 @@ export function Navigation() {
         <Link to="/" style={{ 
           display: 'flex', 
           alignItems: 'center', 
-          gap: '2px', 
+          gap: '6px', 
           fontWeight: 700, 
           fontSize: '1.25rem',
           letterSpacing: '-0.025em'
@@ -29,12 +30,41 @@ export function Navigation() {
         </Link>
         <nav style={{
           display: 'flex',
-          gap: '2rem',
-          fontWeight: 500
+          alignItems: 'center',
+          gap: '1.75rem',
+          fontWeight: 500,
+          fontSize: '0.95rem'
         }}>
           <Link to="/">Overview</Link>
           <Link to="/installation">Installation</Link>
           <Link to="/guide">User Guide</Link>
+          <a 
+            href="https://blogs.lupyd.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+          >
+            <span>Blogs</span>
+            <ExternalLink size={12} style={{ opacity: 0.6 }} />
+          </a>
+          <a 
+            href="https://about.lupyd.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+          >
+            <span>About</span>
+            <ExternalLink size={12} style={{ opacity: 0.6 }} />
+          </a>
+          <a 
+            href="https://billing.lupyd.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+          >
+            <span>Pricing</span>
+            <ExternalLink size={12} style={{ opacity: 0.6 }} />
+          </a>
         </nav>
       </div>
     </header>
