@@ -34,7 +34,7 @@ export const DOC_SECTIONS: DocSection[] = [
         id: 'what-is-lupyd',
         title: 'What is Lupyd?',
         path: '/intro/what-is-lupyd',
-        description: 'Understand Lupyd’s dual role as a high-trust social platform and enterprise collaboration engine.'
+        description: 'A modern chat and collaboration platform built with privacy and encryption for startups and organizations.'
       },
       {
         id: 'why-lupyd',

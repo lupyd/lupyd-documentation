@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { DOC_SECTIONS } from '../data/docsData';
 import { Home } from '../pages/Home';
+import { WhatIsLupyd } from '../pages/WhatIsLupyd';
 import { Installation } from '../pages/Installation';
 import { Features } from '../pages/Features';
 import { GroupChats } from '../pages/GroupChats';
@@ -42,21 +43,7 @@ export const DocTopicContent: React.FC<DocTopicContentProps> = ({ sectionId, sub
       }
 
       if (subtopicId === 'what-is-lupyd') {
-        return (
-          <div style={{ maxWidth: '850px' }}>
-            <h1 style={{ fontSize: '36px', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: '2rem', color: '#000000' }}>
-              What is Lupyd?
-            </h1>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              <p style={{ fontSize: '1.1rem', color: '#444444', lineHeight: 1.75, fontWeight: 400, margin: 0 }}>
-                <strong style={{ color: '#000000', fontWeight: 600 }}>Lupyd</strong> is a unified digital platform designed to serve both individuals and businesses through a seamless combination of communication, content, and cloud-driven services. It bridges the gap between social interaction and professional engagement, enabling users to create, connect, and collaborate within a secure environment.
-              </p>
-              <p style={{ fontSize: '1.1rem', color: '#444444', lineHeight: 1.75, fontWeight: 400, margin: 0 }}>
-                With a focus on simplicity and performance, Lupyd delivers an intuitive user experience that feels natural, responsive, and accessible to all. Whether for communication, entertainment, or business growth, the platform is designed to adapt to modern digital needs without sacrificing security.
-              </p>
-            </div>
-          </div>
-        );
+        return <WhatIsLupyd />;
       }
 
       if (subtopicId === 'why-lupyd') {

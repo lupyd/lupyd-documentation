@@ -31,6 +31,76 @@ export const seoData: Record<string, PageSeo> = {
       }
     ]
   },
+  "/what-is-lupyd": {
+    title: "What Is Lupyd? - Secure Chat & Collaboration Platform",
+    description: "Lupyd is a modern chat and collaboration platform built with privacy, encryption, and lightweight team communication for startups and organizations.",
+    schemas: [
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "What Is Lupyd? - Privacy-Focused Chat & Collaboration Platform",
+        "description": "Lupyd brings secure team communication and business collaboration together in a clean, lightweight, and professional environment with privacy and encryption at the centre.",
+        "inLanguage": "en",
+        "mainEntityOfPage": "https://docs.lupyd.com/what-is-lupyd"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://docs.lupyd.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "What Is Lupyd?",
+            "item": "https://docs.lupyd.com/what-is-lupyd"
+          }
+        ]
+      }
+    ]
+  },
+  "/intro/what-is-lupyd": {
+    title: "What Is Lupyd? - Secure Chat & Collaboration Platform",
+    description: "Lupyd is a modern chat and collaboration platform built with privacy, encryption, and lightweight team communication for startups and organizations.",
+    schemas: [
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "What Is Lupyd? - Privacy-Focused Chat & Collaboration Platform",
+        "description": "Lupyd brings secure team communication and business collaboration together in a clean, lightweight, and professional environment with privacy and encryption at the centre.",
+        "inLanguage": "en",
+        "mainEntityOfPage": "https://docs.lupyd.com/intro/what-is-lupyd"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://docs.lupyd.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Introduction",
+            "item": "https://docs.lupyd.com/intro"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "What Is Lupyd?",
+            "item": "https://docs.lupyd.com/intro/what-is-lupyd"
+          }
+        ]
+      }
+    ]
+  },
   "/installation": {
     title: "Install Lupyd on Mobile & Desktop - Lupyd Developer Docs",
     description: "Learn how to install Lupyd on Windows, Linux, Android, and iOS devices with our unified onboarding experience. Get started.",

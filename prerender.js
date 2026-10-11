@@ -40,6 +40,7 @@ const routes = [
   '/help/troubleshooting',
   '/help/common-issues',
   '/help/contact-support',
+  '/what-is-lupyd',
   '/installation',
   '/guide',
   '/features',
@@ -178,7 +179,7 @@ async function run() {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${routes.map(r => {
   const pageUrl = r === '/' ? `${baseUrl}/` : `${baseUrl}${r}/`;
-  const priority = r === '/' ? '1.0' : (r === '/guide' || r === '/firefly' || r === '/server-api' ? '0.9' : '0.8');
+  const priority = r === '/' ? '1.0' : (r === '/guide' || r === '/firefly' || r === '/server-api' || r === '/what-is-lupyd' ? '0.9' : '0.8');
   return `  <url>
     <loc>${pageUrl}</loc>
     <lastmod>${today}</lastmod>

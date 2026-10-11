@@ -41,7 +41,8 @@ export function AppContent() {
         <Route path="help" element={<DocTopicContent sectionId="help" subtopicId="faq" />} />
         <Route path="help/:subtopicId" element={<SubtopicParamRoute sectionId="help" />} />
 
-        {/* 3. Backward Compatibility Routes for Existing Permalinks */}
+        {/* 3. Backward Compatibility & SEO Permalinks */}
+        <Route path="what-is-lupyd" element={<DocTopicContent sectionId="intro" subtopicId="what-is-lupyd" />} />
         <Route path="installation" element={<DocTopicContent sectionId="get-started" subtopicId="installation" />} />
         <Route path="guide" element={<DocTopicContent sectionId="build" subtopicId="developer-docs" />} />
         <Route path="features" element={<DocTopicContent sectionId="using-lupyd" subtopicId="core-features" />} />
