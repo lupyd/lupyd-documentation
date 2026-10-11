@@ -85,10 +85,12 @@ interface BookProps {
 }
 
 const BookCard: React.FC<BookProps> = ({ section, index }) => {
+  const targetPath = section.subtopics[0]?.path || section.path;
+
   return (
     <div className="book-slot">
       <Link
-        to={section.path}
+        to={targetPath}
         className="shelf-book"
         aria-label={`${section.title} - ${section.volume}`}
         id={`bookshelf-book-${section.id}`}

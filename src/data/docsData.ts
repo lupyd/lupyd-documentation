@@ -254,7 +254,7 @@ export const ALL_SEARCH_ITEMS = DOC_SECTIONS.flatMap(section => [
   {
     title: section.title,
     section: section.title,
-    path: section.path,
+    path: section.subtopics[0]?.path || section.path,
     description: section.description,
     type: 'section' as const,
     volume: section.volume

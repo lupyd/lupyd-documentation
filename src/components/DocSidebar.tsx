@@ -131,17 +131,20 @@ export const DocSidebar: React.FC<DocSidebarProps> = ({ isOpen, onClose }) => {
         {DOC_SECTIONS.map((section: DocSection) => {
           const Icon = SECTION_ICONS[section.id] || BookOpen;
           const isExpanded = !!expandedSections[section.id];
-          const isSectionActive = location.pathname === section.path;
+          const isSectionActive = location.pathname.startsWith(section.path);
+          const firstSubtopicPath = section.subtopics[0]?.path || section.path;
 
           return (
             <div key={section.id} className="sidebar-section-group">
               {/* Section Header Accordion Toggle */}
               <div className={`sidebar-section-header ${isSectionActive ? 'active-section' : ''}`}>
                 <NavLink
-                  to={section.path}
-                  end
-                  className={({ isActive }) => `sidebar-section-title-link ${isActive ? 'active' : ''}`}
-                  onClick={onClose}
+                  to={firstSubtopicPath}
+                  className={`sidebar-section-title-link ${isSectionActive ? 'active' : ''}`}
+                  onClick={() => {
+                    setExpandedSections(prev => ({ ...prev, [section.id]: true }));
+                    onClose();
+                  }}
                 >
                   <Icon size={16} className="sidebar-section-icon" />
                   <span className="section-title-text">{section.title}</span>

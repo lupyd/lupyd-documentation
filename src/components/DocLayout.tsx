@@ -101,7 +101,7 @@ export const DocLayout: React.FC = () => {
               {currentSection && (
                 <>
                   <span className="breadcrumb-separator">/</span>
-                  <Link to={currentSection.path} className="breadcrumb-item">
+                  <Link to={currentSection.subtopics[0]?.path || currentSection.path} className="breadcrumb-item">
                     {currentSection.title}
                   </Link>
                 </>

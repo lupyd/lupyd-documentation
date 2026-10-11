@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  ShieldCheck, Lock, ArrowRight, ArrowLeft, CheckCircle2, 
-  Terminal, Key, Users, Globe, Cpu
+  ArrowRight, ArrowLeft, CheckCircle2, 
+  Terminal, Key, Cpu
 } from 'lucide-react';
 import { DOC_SECTIONS } from '../data/docsData';
+import { Home } from '../pages/Home';
 import { Installation } from '../pages/Installation';
 import { Features } from '../pages/Features';
 import { GroupChats } from '../pages/GroupChats';
@@ -37,125 +38,48 @@ export const DocTopicContent: React.FC<DocTopicContentProps> = ({ sectionId, sub
     // 1. INTRODUCTION
     if (sectionId === 'intro') {
       if (subtopicId === 'introduction') {
-        return (
-          <div className="doc-article">
-            <h1 className="doc-article-title">Introduction to Lupyd</h1>
-            <p className="doc-lead-paragraph">
-              <strong>Lupyd</strong> is a unified digital platform designed to serve both individuals and businesses through a seamless combination of communication, content, and cloud-driven services. It bridges the gap between social interaction and professional engagement, enabling users to create, connect, and collaborate within a secure environment.
-            </p>
-
-            <div className="doc-callout">
-              <ShieldCheck size={24} className="doc-callout-icon" />
-              <div>
-                <h4>Privacy by Architecture</h4>
-                <p>At its core, Lupyd redefines social media by placing privacy and trust at the forefront. Every interaction is built with strong encryption principles, ensuring that user data remains protected and conversations stay strictly between intended participants.</p>
-              </div>
-            </div>
-
-            <section className="doc-section-block">
-              <h2>A New Digital Philosophy</h2>
-              <p>
-                Unlike traditional platforms that rely on user data monetization, Lupyd is built on a different philosophy—prioritizing user control, transparency, and ethical data practices. Personal information is never sold, and content integrity is maintained without compromise.
-              </p>
-              <p>
-                The platform empowers users to discover and share content while engaging with emerging voices, trends, and communities shaped by the evolving Gen Z digital culture. At the same time, businesses gain access to a dynamic ecosystem where they can showcase their services, connect with audiences, and grow organically.
-              </p>
-            </section>
-
-            <div className="doc-feature-grid">
-              <div className="doc-feature-card">
-                <Lock size={20} />
-                <h3>End-to-End Encrypted</h3>
-                <p>Zero-trust messaging protocols protect both 1:1 and group conversations without server-side plaintext exposure.</p>
-              </div>
-              <div className="doc-feature-card">
-                <Users size={20} />
-                <h3>Community & Commerce</h3>
-                <p>Direct B2B and B2C integration lets creators and brands establish verifiable trust with their audience.</p>
-              </div>
-            </div>
-          </div>
-        );
+        return <Home />;
       }
 
       if (subtopicId === 'what-is-lupyd') {
         return (
-          <div className="doc-article">
-            <h1 className="doc-article-title">What is Lupyd?</h1>
-            <p className="doc-lead-paragraph">
-              Lupyd is a hybrid digital ecosystem uniting high-performance social networking with enterprise-grade private communication. It is designed to be the single application where users manage their personal relationships, business presence, and cloud-stored media safely.
-            </p>
-
-            <section className="doc-section-block">
-              <h2>The Three Pillars of Lupyd</h2>
-              <div className="doc-pillar-list">
-                <div className="doc-pillar-item">
-                  <div className="pillar-num">01</div>
-                  <div>
-                    <h3>Unified Communication</h3>
-                    <p>High-definition voice, video, and text messaging powered by MLS (Messaging Layer Security) protocols, ensuring zero metadata leakage.</p>
-                  </div>
-                </div>
-                <div className="doc-pillar-item">
-                  <div className="pillar-num">02</div>
-                  <div>
-                    <h3>Curated Social Discovery</h3>
-                    <p>An algorithmic feed designed around user intent rather than behavioral tracking, highlighting authentic creator voices and verified businesses.</p>
-                  </div>
-                </div>
-                <div className="doc-pillar-item">
-                  <div className="pillar-num">03</div>
-                  <div>
-                    <h3>Integrated Business Cloud</h3>
-                    <p>Built-in storefronts, appointment scheduling, and customer communication channels directly embedded within user profiles.</p>
-                  </div>
-                </div>
-              </div>
-            </section>
+          <div style={{ maxWidth: '850px' }}>
+            <h1 style={{ fontSize: '36px', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: '2rem', color: '#000000' }}>
+              What is Lupyd?
+            </h1>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <p style={{ fontSize: '1.1rem', color: '#444444', lineHeight: 1.75, fontWeight: 400, margin: 0 }}>
+                <strong style={{ color: '#000000', fontWeight: 600 }}>Lupyd</strong> is a unified digital platform designed to serve both individuals and businesses through a seamless combination of communication, content, and cloud-driven services. It bridges the gap between social interaction and professional engagement, enabling users to create, connect, and collaborate within a secure environment.
+              </p>
+              <p style={{ fontSize: '1.1rem', color: '#444444', lineHeight: 1.75, fontWeight: 400, margin: 0 }}>
+                With a focus on simplicity and performance, Lupyd delivers an intuitive user experience that feels natural, responsive, and accessible to all. Whether for communication, entertainment, or business growth, the platform is designed to adapt to modern digital needs without sacrificing security.
+              </p>
+            </div>
           </div>
         );
       }
 
       if (subtopicId === 'why-lupyd') {
         return (
-          <div className="doc-article">
-            <h1 className="doc-article-title">Why Lupyd?</h1>
-            <p className="doc-lead-paragraph">
-              Legacy social networks monetize your attention, auction your personal interactions to advertisers, and trap communities inside closed surveillance systems. Lupyd was engineered from the ground up to solve these systemic failures.
-            </p>
-
-            <div className="doc-table-wrapper">
-              <table className="doc-comparison-table">
-                <thead>
-                  <tr>
-                    <th>Feature</th>
-                    <th>Legacy Social Platforms</th>
-                    <th>Lupyd Platform</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>Data Ownership</strong></td>
-                    <td>Monetized & sold to third-party ad brokers</td>
-                    <td>User-sovereign with zero tracking</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Messaging Privacy</strong></td>
-                    <td>Often unencrypted or metadata-harvested</td>
-                    <td>End-to-end encrypted with MLS protocols</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Business Integration</strong></td>
-                    <td>Expensive ad bidding wars</td>
-                    <td>Direct discovery & verified relationships</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Cross-Platform</strong></td>
-                    <td>Inconsistent experience & tracking cookies</td>
-                    <td>Unified responsive client on mobile & desktop</td>
-                  </tr>
-                </tbody>
-              </table>
+          <div style={{ maxWidth: '850px' }}>
+            <h1 style={{ fontSize: '36px', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: '2rem', color: '#000000' }}>
+              Why Lupyd?
+            </h1>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <p style={{ fontSize: '1.1rem', color: '#444444', lineHeight: 1.75, fontWeight: 400, margin: 0 }}>
+                Unlike traditional platforms that rely on user data monetization, Lupyd is built on a different philosophy—prioritizing user control, transparency, and ethical data practices. Personal information is never sold, and content integrity is maintained without compromise.
+              </p>
+              <div style={{
+                backgroundColor: '#fafafa',
+                border: '1px solid #eaeaea',
+                borderRadius: '8px',
+                padding: '1.5rem',
+                marginTop: '0.5rem'
+              }}>
+                <p style={{ fontSize: '1.1rem', color: '#000000', lineHeight: 1.6, fontWeight: 500, margin: 0 }}>
+                  Lupyd is not just another social platform—it is a secure digital infrastructure where privacy, innovation, and user empowerment come together to shape the future of online interaction.
+                </p>
+              </div>
             </div>
           </div>
         );
@@ -163,59 +87,41 @@ export const DocTopicContent: React.FC<DocTopicContentProps> = ({ sectionId, sub
 
       if (subtopicId === 'platform-overview') {
         return (
-          <div className="doc-article">
-            <h1 className="doc-article-title">Platform Overview</h1>
-            <p className="doc-lead-paragraph">
-              The Lupyd platform is constructed as a distributed, multi-layered architecture combining client applications, blind relay networks, and high-performance Rust social graph servers.
-            </p>
-
-            <section className="doc-section-block">
-              <h2>Architectural Topology</h2>
-              <div className="doc-architecture-diagram">
-                <div className="arch-layer">
-                  <div className="arch-layer-title">Client Layer</div>
-                  <div className="arch-layer-body">iOS · Android · Desktop (macOS / Windows / Linux) · Web App</div>
-                </div>
-                <div className="arch-arrow">↓ End-to-End Encrypted Handshake</div>
-                <div className="arch-layer">
-                  <div className="arch-layer-title">Firefly Relay Network (Rust / Hyper)</div>
-                  <div className="arch-layer-body">Blind message relayer · Key package distribution · MLS group synchronization</div>
-                </div>
-                <div className="arch-arrow">↓ Zero-Knowledge Graph API</div>
-                <div className="arch-layer">
-                  <div className="arch-layer-title">Social Graph Engine</div>
-                  <div className="arch-layer-body">Post distribution · Follower index · Voting & interaction registries</div>
-                </div>
-              </div>
-            </section>
+          <div style={{ maxWidth: '850px' }}>
+            <h1 style={{ fontSize: '36px', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: '2rem', color: '#000000' }}>
+              Platform Overview
+            </h1>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <p style={{ fontSize: '1.1rem', color: '#444444', lineHeight: 1.75, fontWeight: 400, margin: 0 }}>
+                The platform empowers users to discover and share content while engaging with emerging voices, trends, and communities shaped by the evolving Gen Z digital culture. At the same time, businesses gain access to a dynamic ecosystem where they can showcase their services, connect with audiences, and grow organically.
+              </p>
+              <p style={{ fontSize: '1.1rem', color: '#444444', lineHeight: 1.75, fontWeight: 400, margin: 0 }}>
+                With a focus on simplicity and performance, Lupyd delivers an intuitive user experience that feels natural, responsive, and accessible to all. Whether for communication, entertainment, or business growth, the platform is designed to adapt to modern digital needs without sacrificing security.
+              </p>
+            </div>
           </div>
         );
       }
 
       if (subtopicId === 'privacy-security') {
         return (
-          <div className="doc-article">
-            <h1 className="doc-article-title">Privacy & Security</h1>
-            <p className="doc-lead-paragraph">
-              Lupyd adheres strictly to the zero-trust paradigm. Cryptographic keys are generated client-side on your hardware device and never transmitted to our servers in plaintext.
-            </p>
-
-            <div className="doc-security-grid">
-              <div className="doc-security-item">
-                <Key size={22} />
-                <h3>Client-Side Key Generation</h3>
-                <p>PreKey bundles and Identity Keys are mathematically derived on-device using Ed25519 and X25519 curves.</p>
+          <div style={{ maxWidth: '850px' }}>
+            <h1 style={{ fontSize: '36px', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: '2rem', color: '#000000' }}>
+              Privacy & Security
+            </h1>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{
+                borderLeft: '4px solid #eaeaea',
+                paddingLeft: '1.25rem',
+                margin: '0.75rem 0'
+              }}>
+                <p style={{ fontSize: '1.1rem', color: '#444444', lineHeight: 1.75, fontWeight: 400, margin: 0 }}>
+                  At its core, Lupyd redefines social media by placing privacy and trust at the forefront. Every interaction is built with strong encryption principles, ensuring that user data remains protected and conversations stay strictly between intended participants.
+                </p>
               </div>
-              <div className="doc-security-item">
-                <ShieldCheck size={22} />
-                <h3>Forward & Post-Compromise Secrecy</h3>
-                <p>Every group commit ratchets the key schedule forward, preventing past or future message interception.</p>
-              </div>
-              <div className="doc-security-item">
-                <Globe size={22} />
-                <h3>Blind Relay Architecture</h3>
-                <p>Firefly servers cannot inspect payloads, decrypt messages, or identify conversational contents.</p>
-              </div>
+              <p style={{ fontSize: '1.1rem', color: '#444444', lineHeight: 1.75, fontWeight: 400, margin: 0 }}>
+                Unlike traditional platforms that rely on user data monetization, Lupyd is built on a different philosophy—prioritizing user control, transparency, and ethical data practices. Personal information is never sold, and content integrity is maintained without compromise.
+              </p>
             </div>
           </div>
         );
