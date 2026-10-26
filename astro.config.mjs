@@ -35,9 +35,16 @@ export default defineConfig({
 			],
 			sidebar: [
 				{
+					label: 'Introduction',
+					items: [
+						{ label: 'Overview', link: '/' },
+						'introduction',
+						'introduction/what-is-lupyd',
+					],
+				},
+				{
 					label: 'Getting Started',
 					items: [
-						{ label: 'Introduction', link: '/' },
 						'getting-started/installation',
 						'getting-started/quick-start',
 					],
@@ -86,5 +93,10 @@ export default defineConfig({
 		'/firefly': '/developers/firefly/',
 		'/server-api': '/developers/server/',
 		'/docs-support': '/support/faq/',
+		// URLs from the unmerged React redesign (PR #19).
+		'/intro': '/introduction/',
+		'/intro/introduction': '/introduction/',
+		'/intro/what-is-lupyd': '/introduction/what-is-lupyd/',
+		'/what-is-lupyd': '/introduction/what-is-lupyd/',
 	},
 });
