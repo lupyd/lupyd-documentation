@@ -1,0 +1,58 @@
+---
+title: Architecture
+description: How Lupyd clients, Auth0, Firefly, and the Lupyd Server work together.
+sidebar:
+  order: 1
+---
+
+```text
+                     ┌──────────┐
+          login      │  Auth0   │
+     ┌──────────────▶│  (JWT)   │
+     │               └──────────┘
+┌────┴─────┐  REST/protobuf   ┌──────────────┐      ┌────────────┐
+│  Client  │─────────────────▶│ Lupyd Server │─────▶│ PostgreSQL │
+│   app    │                  └──────┬───────┘      └────────────┘
+│          │                         │ admin API (push, blocks, accepts)
+│          │  REST/protobuf   ┌──────▼───────┐      ┌────────────┐
+│          │─────────────────▶│   Firefly    │─────▶│ PostgreSQL │
+│          │◀────────────────▶│    server    │      └────────────┘
+└──────────┘  WebSocket /     └──┬────────┬──┘
+              WebTransport       │        │
+                          ┌──────▼──┐  ┌──▼──────────────┐
+                          │   FCM   │  │ Encrypted blobs │
+                          │ (push)  │  │      (CDN)      │
+                          └─────────┘  └─────────────────┘
+```
+
+## Components
+
+| Component | Role |
+| --- | --- |
+| **Client apps** | Android, iOS, desktop, and web apps. Messaging cryptography runs on the device through the [Firefly client SDK](/developers/firefly/client-sdk/). |
+| **Auth0** | Identity provider. Issues RS256 access tokens carrying `uname` and `perms` claims. |
+| **Lupyd Server** | Social graph and content. Stateless HTTP; PostgreSQL storage. |
+| **Firefly server** | Delivery service and directory for encrypted messaging. Stores ciphertext, key packages, and prekey bundles; validates MLS commits; pushes messages in real time. |
+| **CDN** | Stores encrypted attachments, group history chunks, and backups. |
+
+## Request flow
+
+1. The client signs the user in with Auth0 and receives an access token.
+2. Social actions (profile, posts, follows) go to the **Lupyd Server**.
+3. The client registers the device with **Firefly**, obtains a signed device credential,
+   uploads key material, and opens a real-time connection.
+4. Messages are encrypted on the device and sent through Firefly, which relays them to
+   the recipients' devices — or stores them until those devices reconnect — and sends a
+   push notification.
+5. When a user blocks or accepts someone on the Lupyd Server, the server mirrors the
+   change to Firefly so messaging and calls respect it.
+
+## Trust model
+
+- The servers never see plaintext messages or message keys.
+- Group handshake messages (commits) are visible to Firefly so it can enforce group
+  rules and permissions; application messages are always encrypted.
+- Device credentials are signed by Firefly and bound to the user's Auth0 identity, so
+  members can verify who owns each device in a group.
+
+See [End-to-end encryption](/developers/firefly/encryption/) for details.

@@ -1,0 +1,33 @@
+---
+title: Developer overview
+description: Start here to build on Lupyd — the services, protocols, and APIs behind the platform.
+sidebar:
+  label: Overview
+  order: 0
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Lupyd's backend has two main services. Both are written in Rust, authenticate users with
+the same Auth0 access tokens, and exchange Protocol Buffers.
+
+| Service | Repository | Responsibility |
+| --- | --- | --- |
+| **[Firefly](/developers/firefly/)** | `firefly` (client libraries and schema), `firefly-mls` (server) | End-to-end encrypted messaging: devices, 1:1 chats (Signal protocol), groups (MLS), calls, meetings, encrypted backups, and push notifications. |
+| **[Lupyd Server](/developers/server/)** | `lupyd-rust-server` | The social layer: profiles, follows and blocks, posts, votes, hashtags, and notifications. |
+
+<CardGrid>
+	<LinkCard title="Architecture" href="/developers/architecture/" description="How clients, Firefly, the Lupyd Server, and Auth0 fit together." />
+	<LinkCard title="Firefly overview" href="/developers/firefly/" description="Encrypted messaging, groups, and real-time transport." />
+	<LinkCard title="Lupyd Server overview" href="/developers/server/" description="Social graph and content REST API." />
+	<LinkCard title="Firefly client SDK" href="/developers/firefly/client-sdk/" description="Rust and JavaScript libraries that handle the cryptography for you." />
+</CardGrid>
+
+## Shared conventions
+
+- **Authentication:** `Authorization: Bearer <JWT>` with an Auth0 access token for the
+  audience `https://lupyd.com`. See [Lupyd Server authentication](/developers/server/authentication/)
+  and [Firefly authentication](/developers/firefly/authentication/).
+- **Encoding:** request and response bodies are protobuf unless a page says otherwise.
+- **List parameters:** comma-separated, with the comma percent-encoded as `%2C`.
+- **CORS:** both services allow any origin, so browser clients can call them directly.

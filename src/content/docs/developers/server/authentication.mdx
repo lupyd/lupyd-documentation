@@ -1,0 +1,93 @@
+---
+title: Authentication
+description: How the Lupyd Server verifies Auth0 JWTs and enforces permission bits.
+sidebar:
+  order: 1
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+The Lupyd Server authenticates users with JSON Web Tokens issued by
+[Auth0](https://auth0.com/). Send the token on every request:
+
+```http
+Authorization: Bearer <access-token>
+```
+
+The `Bearer ` prefix (with a single space) is required.
+
+## Token verification
+
+A token is accepted when **all** of the following hold:
+
+| Check | Requirement |
+| --- | --- |
+| Signature | RS256, verified against the JWKS at `https://<AUTH0_DOMAIN>/.well-known/jwks.json`, selected by the `kid` header. Keys are cached according to the JWKS response's cache headers. |
+| `exp` | Not in the past. |
+| `iss` | Exactly equal to the configured `AUTH0_ISSUER`. |
+| `aud` | A JSON **array** that contains `"https://lupyd.com"`. |
+
+The server reads three claims:
+
+| Claim | Meaning |
+| --- | --- |
+| `sub` | The Auth0 user ID. |
+| `uname` | The Lupyd username. Empty until the user completes sign-up. |
+| `perms` | A 64-bit permission bitmask (see below). `0` until sign-up completes. |
+
+## Optional and required authentication
+
+- **Optional-auth** endpoints (most `GET` reads) treat a missing or invalid token as an
+  anonymous request. Signing in can change the response — for example, authors see their
+  own expired posts and private settings.
+- **Required-auth** endpoints return `401 Unauthorized` with a plain-text reason, such as
+  `Missing Authorization Header`, `Token is expired`, or
+  `You are missing some permissions`.
+
+## Permissions
+
+Each endpoint in the [API reference](/developers/server/api-reference/) lists the
+permission bit it requires.
+
+| Permission | Bit | Grants |
+| --- | --- | --- |
+| `AdministrativePrivileges` | `1` | Administrative operations. |
+| `UserChatList` | `2` | Read chat sessions and notifications. |
+| `UpdateUserChat` | `4` | Manage chat keys and chat sessions. |
+| `CreateFile` | `8` | Upload files. |
+| `UpdatePost` | `16` | Create, edit, delete, vote on, share, and report posts. |
+| `UpdateUser` | `32` | Edit or delete your profile, manage relations, save posts. |
+| `CreateGroup` | `64` | Create groups. |
+| `UserTokensHandle` | `128` | Manage tokens. |
+| `ManageAds` | `256` | Manage ads. |
+
+A regular user receives `254` (every bit except `AdministrativePrivileges`).
+
+## Sign-up flow
+
+New Auth0 accounts have no username and `perms = 0`. To finish creating a Lupyd account:
+
+<Steps>
+
+1. Sign the user in with Auth0 and obtain an access token for the audience
+   `https://lupyd.com`.
+2. Call [`POST /user`](/developers/server/api-reference/#post-user) with a
+   `lupyd.user.FullUser` body containing the chosen `uname`.
+3. The server creates the profile and writes `uname` and `perms: 254` to the user's
+   Auth0 `app_metadata`.
+4. **Refresh the access token.** The new token carries `uname` and `perms`, and is
+   required for every other authenticated endpoint.
+
+</Steps>
+
+## Signing out everywhere
+
+[`DELETE /sessions`](/developers/server/api-reference/#delete-sessions) revokes the
+user's Auth0 refresh tokens and sessions. Existing access tokens stay valid until they
+expire, so keep access-token lifetimes short.
+
+<Aside type="danger" title="Never enable TESTING in production">
+	When the `TESTING` environment variable is set, the server accepts
+	`Authorization: Bearer <username>:<user_id>` **without verification**. It exists only
+	for the integration test suite.
+</Aside>

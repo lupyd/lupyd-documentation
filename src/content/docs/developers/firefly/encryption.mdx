@@ -1,0 +1,148 @@
+---
+title: End-to-end encryption
+description: How Firefly encrypts 1:1 chats with the Signal protocol and groups with MLS, including roles, permissions, and key management.
+sidebar:
+  order: 3
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+Firefly encrypts all message content on the device. The server stores and forwards
+ciphertext only.
+
+| Conversation | Protocol |
+| --- | --- |
+| 1:1 chats | [Signal protocol](https://signal.org/docs/) (X3DH-style prekeys with post-quantum KEM prekeys, Double Ratchet) via libsignal |
+| Groups | [MLS](https://www.rfc-editor.org/rfc/rfc9420) via [mls-rs](https://github.com/awslabs/mls-rs), ciphersuite `P256_AES128` |
+
+## 1:1 chats (Signal protocol)
+
+Each device publishes **prekey bundles**. To start a session with someone, a device
+fetches one of their bundles per device and encrypts to each.
+
+| Request | Description |
+| --- | --- |
+| `POST /user/preKeyBundles` | Upload your bundles (`firefly.PreKeyBundleEntries`). |
+| `GET /user/preKeyBundles?other=<username>` | Fetch bundles for all of a user's devices. |
+| `GET /user/preKeyBundles?ids=<address_ids>` | Fetch bundles for specific addresses. |
+| `GET /user/preKeyBundles?id=<address_id>&onlyIds=true` | List IDs of your remaining bundles. |
+| `DELETE /user/preKeyBundles?addressId=<id>&ids=<ids>` | Delete used bundles. |
+| `POST /user/conversation?other=<username>&settings=<n>` | Start a conversation. |
+
+Messages are sent with the `uploadUserMessage` [RPC](/developers/firefly/realtime/#requests-and-responses),
+encrypted separately for each recipient device and for your own other devices.
+
+### Message requests
+
+If a recipient has disabled message requests (`MessageRequestSettings.requests_disabled`),
+only users they have **accepted** can message or call them. Others receive error `403`.
+
+## Groups (MLS)
+
+### Key packages
+
+Each device keeps a pool of single-use MLS **key packages** on the server so others can
+add it to groups while it is offline. The reference client keeps **32** available.
+
+| Request | Description |
+| --- | --- |
+| `POST /group/keyPackages?address=<address_id>` | Upload packages (`firefly.GroupKeyPackages`). Package IDs are `int32` values chosen by the client. |
+| `GET /group/keyPackages?address_id=<id>&device_id=<id>` | List your own packages. |
+| `GET /group/keyPackages?other=<username>&all=true` | Fetch one package per device of another user. |
+| `DELETE /group/keyPackages?address=<id>&ids=<ids>` | Remove stale packages. |
+
+### Creating a group
+
+<Steps>
+
+1. Create an MLS group locally with the [Firefly group extension](#roles-channels-and-permissions).
+2. `POST /group` with `firefly.Group { name, description, settings, state }`, where
+   `state` is the MLS `GroupInfo`.
+3. The server returns the group's numeric `id`.
+
+</Steps>
+
+### Adding members
+
+<Steps>
+
+1. Fetch the invitee's key packages: `GET /group/keyPackages?other=<username>&all=true`.
+2. **Validate each package**: its credential must belong to the invitee, be signed by
+   Firefly, and not be expired; skip devices already in the group.
+3. Create a commit that adds the packages and assigns the invitee a role.
+4. `POST /group/commitAndWelcome` with `firefly.GroupCommitAndWelcome` (max 4 MiB).
+5. **Apply the commit locally only after the server accepts it.**
+
+</Steps>
+
+The invitee receives a `groupInvite` over the [real-time connection](/developers/firefly/realtime/)
+(or from `GET /group/invites?address=<id>`), joins with the Welcome message, and reports
+its position with `POST /group/member?address=<id>`.
+
+### Other changes
+
+Removing members, changing roles or channels, and key updates are ordinary commits sent
+with `POST /group/commit`. The server returns the commit's assigned `id` and `epoch`.
+
+Firefly acts as an MLS *external observer*: it validates every commit against the group
+rules before distributing it. If two members commit for the same epoch, only the first is
+accepted; the server rejects the other with `400`, and that member must process the accepted commit and retry.
+
+### Sending messages
+
+Application messages are sent with the `uploadGroupMessage` RPC. Receivers reject
+application messages from epochs other than the current one, so process all pending
+commits first.
+
+<Aside type="note" title="What the server can see">
+	Handshake messages (commits and proposals) are not encrypted to the server, so it can
+	enforce membership and permission rules. It sees *who* is in a group and its role
+	structure, but never message content.
+</Aside>
+
+## Roles, channels, and permissions
+
+Every group carries a Firefly extension (MLS extension type `65001`) describing:
+
+- **Roles**, each with a permission bitmask.
+- **Channels**, with optional per-role overrides.
+- **Members** and their roles.
+- **Default permissions** for members without a specific role.
+
+| Permission | Bit |
+| --- | --- |
+| `SeeMessage` | `1` |
+| `PinMessage` | `2` |
+| `AddMessage` | `4` |
+| `ManageChannel` | `8` |
+| `ManageRole` | `16` |
+| `ManageMember` | `32` |
+| `ManageGroup` | `64` |
+
+The default is `SeeMessage | AddMessage`. Changes use custom MLS proposals:
+
+| Proposal | Type |
+| --- | --- |
+| `UpdateRole` | `30006` |
+| `UpdateUser` | `30007` |
+| `UpdateChannel` | `30008` |
+| `UpdateRoleInChannel` | `30009` |
+
+Proposals are permission-checked by every member and by the server.
+
+## Recovery and history
+
+- **Re-adds:** if a device loses its group state, it asks to be re-added
+  (`POST /group/reAdd`). Another member claims the request
+  (`POST /group/reAdd/claim`) and re-adds it with a fresh key package.
+- **History sharing:** when enabled for a group (`POST /group/history/sync?id=<id>&enabled=true`),
+  existing members can share encrypted history with new devices or members using the
+  history RPCs. Chunks are encrypted with keys that are distributed only through MLS.
+- **Encrypted backups:** 1:1 conversation history can be backed up to the CDN under
+  client-side encryption with `/backups/direct`.
+
+## Plan limits
+
+Group size, upgrades, and channels depend on the group owner's
+[Lupyd plan](https://billing.lupyd.com). Operations beyond the plan return `403` with an
+explanation.

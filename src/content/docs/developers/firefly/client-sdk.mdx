@@ -1,0 +1,160 @@
+---
+title: Client SDK
+description: Use the Firefly Rust and JavaScript client libraries to add end-to-end encrypted messaging to an app or bot.
+sidebar:
+  order: 5
+---
+
+import { Tabs, TabItem, Steps, Aside } from '@astrojs/starlight/components';
+
+The [`firefly`](https://github.com/lupyd/firefly) repository contains client libraries
+that implement everything in this section — device registration, key packages, Signal
+sessions, MLS groups, the real-time protocol, and local persistence — so you do not have
+to.
+
+| Package | Language | Description |
+| --- | --- | --- |
+| `firefly-client` | Rust | High-level async client. Persists state in SQLite. Supports WebSocket and WebTransport. |
+| `firefly-core` | Rust | MLS identity provider, group rules, custom proposals, and extensions. |
+| `firefly-protos` | Rust | Generated protobuf types (`package firefly`). |
+| `firefly-client-node` | WebAssembly | `wasm-bindgen` build of `firefly-client` (Node.js by default; `build.sh` produces a browser build). |
+| `firefly-client-js` | TypeScript | Friendly wrapper around `firefly-client-node`, with a bot framework. Published on npm. |
+| `firefly-protos-js` | JavaScript | Generated protobuf types. Published on npm. |
+
+## Production endpoints
+
+| | URL |
+| --- | --- |
+| HTTP API | `https://firefly.lupyd.com` |
+| WebSocket | `wss://firefly.lupyd.com/` |
+| Auth0 domain | `https://auth.lupyd.com` |
+| Auth0 audience | `https://lupyd.com` |
+
+## JavaScript and TypeScript
+
+<Steps>
+
+1. Build the WebAssembly bindings (requires Rust and
+   [wasm-pack](https://rustwasm.github.io/wasm-pack/)):
+
+   ```sh
+   git clone https://github.com/lupyd/firefly
+   cd firefly/crates/client-node
+   pnpm install
+   pnpm build
+   ```
+
+2. In your project, install the wrapper and link the local bindings:
+
+   ```sh
+   pnpm add firefly-client-js /path/to/firefly/crates/client-node
+   ```
+
+3. Create a client and handle messages:
+
+   ```ts
+   import { FireflyClient } from 'firefly-client-js';
+
+   const client = new FireflyClient({
+     username: 'my_bot',
+     dbFile: './client-store.db',
+   });
+
+   // Reply to "/hi" in a direct message or group.
+   client.command('hi', async (ctx) => {
+     await ctx.reply(`Hello, @${ctx.sender}!`);
+   });
+
+   client.onMessage(async (ctx) => {
+     console.log(`${ctx.sender}: ${ctx.text}`);
+   });
+
+   await client.start();
+   ```
+
+</Steps>
+
+On first start, the client opens a browser for Auth0 login (PKCE) and stores the session
+in `client-session.json` with owner-only permissions. Subsequent runs refresh the token
+automatically.
+
+### Common operations
+
+| Method | Description |
+| --- | --- |
+| `sendUserMessage(to, text)` | Send an encrypted direct message. |
+| `createGroup(name, description?, settings?)` | Create a group. |
+| `addGroupMember(groupId, username, roleId?)` | Add a member (all their devices). |
+| `kickGroupMember(groupId, username)` | Remove a member. |
+| `sendGroupMessage(groupId, text, channelId?)` | Send to a group channel. |
+| `createJoinLink(groupId, expiresInSeconds?, maxUses?)` | Create an invite link. |
+| `joinViaLink(token)` | Join with an invite link. |
+| `getGroups()`, `getGroupMessages(groupId, startBefore?, limit?)` | Read local state. |
+| `getOnlineStatus(usernames)` | Who is online. |
+| `readUserMessagesUpto(other, messageId)` | Send a read receipt. |
+| `dispose()` | Close the connection and release resources. |
+
+### Configuration
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `apiBaseUrl` | `https://firefly.lupyd.com` | Firefly HTTP base URL. |
+| `wsUrl` | `wss://firefly.lupyd.com/` | Real-time endpoint. |
+| `auth0Domain` | `https://auth.lupyd.com` | Auth0 tenant. |
+| `auth0ClientId` | Lupyd's public client | Auth0 application client ID. |
+| `auth0Audience` | `https://lupyd.com` | Token audience. |
+| `port` | `38295` | Local port for the OAuth redirect. |
+| `sessionFile` | `./client-session.json` | Where tokens are stored. |
+| `dbFile` | `./client-store.db` | SQLite database for keys and messages. |
+| `emulatorMode` | `EMULATOR_MODE === 'true'` | Skip OAuth against a local test server. |
+
+<Aside type="caution">
+	`dbFile` holds your device's private keys. Protect it like a password, and never share
+	one database between two running clients.
+</Aside>
+
+A complete example bot lives in
+[`examples/chatbot`](https://github.com/lupyd/firefly/tree/main/examples/chatbot).
+
+## Rust
+
+Add the crates from Git (they are not yet on crates.io), pinning a revision:
+
+```toml
+[dependencies]
+firefly-client = { git = "https://github.com/lupyd/firefly", rev = "<commit>" }
+firefly-protos = { git = "https://github.com/lupyd/firefly", rev = "<commit>" }
+```
+
+`mls-rs` must be compiled in async mode. Add this to `.cargo/config.toml`:
+
+```toml
+[build]
+rustflags = ["--cfg", "mls_build_async"]
+```
+
+The workspace uses Rust edition 2024 (Rust 1.85 or newer).
+
+### Transport selection
+
+| Environment variable | Values | Description |
+| --- | --- | --- |
+| `FIREFLY_TRANSPORT` (or `TRANSPORT`) | `ws`, `wt` | Force WebSocket or WebTransport. Unset tries WebTransport first, then falls back to WebSocket. |
+| `FIREFLY_WT_CONNECT_TIMEOUT_MS` | milliseconds | WebTransport handshake timeout. |
+| `FIREFLY_CDN_URL` (or `CDN_URL`) | URL | CDN for attachments, history, and backups. |
+
+## Testing against a local server
+
+Run a [local Firefly server](/developers/firefly/self-hosting/#run-locally) in emulator
+mode, then:
+
+```sh
+# Unit tests — no server needed
+cargo test --lib
+
+# End-to-end tests
+EMULATOR_MODE=true \
+FIREFLY_BASE_URL=http://127.0.0.1:39209 \
+FIREFLY_WS_URL=ws://127.0.0.1:39209 \
+cargo test --features firefly-client/test-hooks
+```

@@ -1,0 +1,270 @@
+---
+title: API reference
+description: Every Lupyd Server endpoint with its parameters, request and response messages, permissions, and errors.
+sidebar:
+  order: 2
+---
+
+import { Aside, Badge } from '@astrojs/starlight/components';
+
+All request and response bodies are protobuf messages from the
+[`lupyd-protos`](/developers/server/data-types/) packages unless stated otherwise.
+
+**Auth** column legend:
+
+- **none** — no token needed.
+- **optional** — works anonymously; a valid token may change the result.
+- **token** — any valid JWT.
+- A permission name (for example `UpdatePost`) — a valid JWT whose `perms` includes that
+  [bit](/developers/server/authentication/#permissions).
+
+## Common errors
+
+| Status | Body | Cause |
+| --- | --- | --- |
+| `400` | `Request Body couldn't be parsed into <Message> proto struct` | Body is not a valid protobuf of the expected message. |
+| `400` | Reason text | Invalid parameter (bad ULID, bad username, and so on). |
+| `401` | `Missing Authorization Header`, `Token is expired`, `You are missing some permissions`, … | Authentication or permission failure. |
+| `404` | — | Resource not found. |
+| `408` | `You are taking too long` | Request exceeded the 2-second timeout. |
+| `413` | `Your payload is huge` | Body exceeds the limit (1 MiB by default; 1 KiB where noted). |
+| `500` | — | Internal or database error. |
+
+## Users
+
+### `GET /user/{username}`
+
+Get a single profile. **Auth:** optional.
+
+Returns `lupyd.user.User`, or `404` if the user does not exist. Unless you are the user,
+`settings` only exposes the *allow chats* and *public profile picture* bits.
+
+### `GET /user/{prefix}*`
+
+Search usernames by prefix (case-insensitive). The trailing `*` is required.
+**Auth:** optional.
+
+| Query | Type | Description |
+| --- | --- | --- |
+| `offset` | integer | Number of results to skip. Pages are 40 results long. |
+
+Returns `lupyd.user.Users`.
+
+### `GET /user?users={names}`
+
+Batch lookup. **Auth:** optional.
+
+| Query | Type | Description |
+| --- | --- | --- |
+| `users` | `%2C`-separated usernames | Up to 20 names. More returns `413`; an invalid name returns `400`. |
+
+Returns `lupyd.user.Users`.
+
+### `POST /user`
+
+Complete sign-up by claiming a username. See the
+[sign-up flow](/developers/server/authentication/#sign-up-flow).
+**Auth:** a JWT with no `uname` and `perms = 0` (a newly created Auth0 account).
+
+Body: `lupyd.user.FullUser` (max 1 KiB) with `uname`, optional `bio`, and `settings`.
+
+| Status | Meaning |
+| --- | --- |
+| `201` | Profile created. Refresh the access token. |
+| `401` | The token already has a username or permissions. |
+| `409` | `Username has been taken`. |
+
+Usernames are 3–24 characters of letters, digits, or `_`.
+
+### `PUT /user`
+
+Update your bio and settings. **Auth:** `UpdateUser`.
+
+Body: `lupyd.user.UpdateUserInfo`. Always send the full `settings` value — it replaces
+the stored value. Returns `200` with an empty body.
+
+### `DELETE /user`
+
+Permanently delete your account and Auth0 identity. **Auth:** `UpdateUser`.
+
+Returns `200` (`User <name> deleted`) or `404`.
+
+### `DELETE /sessions`
+
+Revoke all refresh tokens and sessions for the caller. **Auth:** token.
+
+Returns `200` with an empty body.
+
+## Social graph
+
+### `PUT /relation`
+
+Create or remove a relationship with another user. **Auth:** `UpdateUser`.
+
+| Query | Type | Description |
+| --- | --- | --- |
+| `uname` | string | The other user. |
+| `relation` | enum | `follow` (default), `unfollow`, `block`, `unblock`, `accept`, `unaccept`. |
+
+- **Blocking** removes any follow between the two users and is mirrored to
+  [Firefly](/developers/firefly/) so blocked users cannot message or call you.
+- **Accepting** lets a user message and call you without a message request; it is also
+  mirrored to Firefly.
+
+Returns `200` with an empty body, or `400` for an unknown `relation`.
+
+### `GET /relations`
+
+List your relationships. **Auth:** `UpdateUser`.
+
+| Query | Type | Description |
+| --- | --- | --- |
+| `start_after` | string | Keyset cursor: only return users whose name sorts after this value. |
+
+Returns `lupyd.user.Relations`. Each `relation` is a [bitmask](/developers/server/data-types/#relation-bits).
+
+## Posts
+
+### `GET /post/{id}`
+
+Get one post by ULID. **Auth:** optional.
+
+Returns `lupyd.post.FullPost`, or `404`. Expired posts are not returned.
+
+### `GET /post`
+
+List or search posts. **Auth:** optional. Returns `lupyd.post.FullPosts`.
+
+Exactly one *selector* chooses what is listed; with no selector you get the latest
+top-level posts.
+
+| Selector | Value | Lists |
+| --- | --- | --- |
+| *(none)* | — | Latest top-level posts. |
+| `users` | `%2C`-separated usernames | Posts by these users. When you request only your own username you also get your expired posts and memories. |
+| `replies` | `%2C`-separated post ULIDs | Replies to these posts. |
+| `ids` | `%2C`-separated post ULIDs | These specific posts. |
+| `search` | URL-encoded text | Full-text search over titles. |
+
+Paging and filtering:
+
+| Query | Type | Default | Description |
+| --- | --- | --- | --- |
+| `type` | integer | — | [`POST_TYPE`](/developers/server/data-types/#post-types) bitmask of types you accept. **Set this** — a post is only included if all of its type bits are in your mask. For example `1` for safe posts only, `15` for everything. |
+| `start` | ULID | newest | Exclusive upper bound (cursor). Pass the last ID of the previous page to get the next one. |
+| `end` | ULID | oldest | Exclusive lower bound. |
+| `limit` | integer | `40` | Page size, maximum `100`. |
+| `offset` | integer | `0` | Search only. Maximum `1024`. |
+
+Feeds are newest-first and cursor-paginated by ULID; search is offset-paginated.
+
+### `POST /post`
+
+Create, schedule, edit, or reply to a post. **Auth:** `UpdatePost`.
+
+Body: `lupyd.post.CreatePostDetails`. Returns `200` with the new post's ID as **16 raw
+bytes**.
+
+| Field | Behaviour |
+| --- | --- |
+| `title`, `body` | At least one must be non-empty. Titles are at most 300 characters; bodies at most 100 KB. |
+| `post_type` | `POST_TYPE` bitmask. `0` or an invalid value is treated as `NSFW \| DANGEROUS`. `SAFE` cannot be combined with other bits. |
+| `expiry` | Unix time in milliseconds. If earlier than now, defaults to one week. |
+| `replying_to` | Parent post ID (16 bytes) to post a reply. The parent's author is notified. |
+| `id` | Optional ULID (16 bytes) to **schedule** the post at that ULID's timestamp — must be in the future and at most one month ahead. |
+| `editing_from` | ID of one of your posts to **edit**. The new body is appended to the post's edit history. |
+| `is_memory` | Marks the post as a memory, visible only to you. Ignored for anonymous posts. |
+
+Hashtags (`#word`, 2–64 alphanumeric characters) are extracted from the body
+automatically.
+
+### `DELETE /post/{id}[/{id}…]`
+
+Delete one or more of your own posts (anonymous posts cannot be deleted).
+**Auth:** `UpdatePost`.
+
+Returns `200` with `N posts were deleted`.
+
+### `POST /post/share?id={id}`
+
+Record a share and notify the author. **Auth:** `UpdatePost`.
+
+### `PUT /vote`
+
+Cast, change, or remove votes. **Auth:** `UpdatePost`.
+
+Body: `lupyd.post.Votes`. For each `Vote`, `id` is the 16-byte post ID and `val` is:
+
+| `val` | Effect |
+| --- | --- |
+| `BoolValue { val: true }` | Upvote |
+| `BoolValue { val: false }` | Downvote |
+| absent | Remove your vote |
+
+Returns `200`, or `400` for an empty list.
+
+### `PUT /savepost?id={id}`
+
+Save a post to your list. **Auth:** `UpdateUser`.
+
+### `GET /saved_posts`
+
+List your saved posts. **Auth:** `UpdateUser`.
+
+Returns the saved post IDs as concatenated 16-byte values (`Content-Type: uuids`). Split
+the body into 16-byte chunks.
+
+### `POST /report`
+
+Report a post. **Auth:** `UpdatePost`.
+
+Body: `lupyd.post.PostReport` (max 1 KiB). Returns `200`.
+
+## Hashtags
+
+### `GET /hashtags`
+
+The 50 most recently trending hashtags. **Auth:** none.
+
+Returns `lupyd.post.PostHashtags`.
+
+## Notifications
+
+### `GET /notifications`
+
+Your notifications. **Auth:** `UserChatList`.
+
+Returns `lupyd.notification.Notifications`.
+
+## Subscription
+
+### `GET /subscription/active`
+
+The caller's active Lupyd subscription, as JSON. **Auth:** token.
+
+<Aside type="note">
+	Plans, billing, checkout, and cancellation have moved to
+	[billing.lupyd.com](https://billing.lupyd.com). The legacy routes
+	`GET /subscription/plans`, `GET /subscription/bills`, `POST /subscription/cancel`, and
+	`POST /create-subscription` return `410 Gone`.
+</Aside>
+
+## Legacy chat keys <Badge text="Deprecated" variant="caution" />
+
+The `/chatkey` and `/chat` routes predate Firefly. New clients should use
+[Firefly](/developers/firefly/) for all messaging, key exchange, and conversation lists.
+
+| Method and path | Auth | Body / response |
+| --- | --- | --- |
+| `GET /chatkey/{username}` | `UpdateUserChat` | `lupyd.chat.ChatKeys` — all of your own keys, or five random keys for another user. |
+| `PUT /chatkey` | `UpdateUserChat` | Body `ChatKeys` to add. |
+| `DELETE /chatkey` | `UpdateUserChat` | Body `ChatKeys` to remove. |
+| `GET /chats` | `UserChatList` | `lupyd.chat.ChatSessions`. |
+| `PUT /chat` | `UpdateUserChat` | Body `ChatSession`; you must be `user1` or `user2`. |
+
+## Diagnostics
+
+### `GET /hello`
+
+Returns a plain-text greeting including your username and permission bits — handy for
+checking that your token is accepted. **Auth:** optional.

@@ -1,0 +1,22 @@
+---
+import Default from '@astrojs/starlight/components/PageFrame.astro';
+import SiteFooter from './SiteFooter.astro';
+---
+
+<Default>
+	<slot name="header" slot="header" />
+	<slot name="sidebar" slot="sidebar" />
+	<div class="page-content"><slot /></div>
+	<SiteFooter />
+</Default>
+
+<style>
+	:global(.main-frame) {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+	}
+	.page-content {
+		flex-grow: 1;
+	}
+</style>

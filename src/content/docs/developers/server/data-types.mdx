@@ -1,0 +1,110 @@
+---
+title: Data types
+description: Protobuf messages, ID formats, and bitmasks used by the Lupyd Server.
+sidebar:
+  order: 3
+---
+
+Message definitions live in the [`lupyd-protos`](https://github.com/lupyd/lupyd-protos)
+repository. Generate bindings for your language with `protoc` or a compatible tool (the
+server uses [quick-protobuf](https://github.com/tafia/quick-protobuf)).
+
+| File | Package | Used for |
+| --- | --- | --- |
+| `post.proto` | `lupyd.post` | Posts, votes, reports, hashtags |
+| `user.proto` | `lupyd.user` | Profiles and relations |
+| `notification.proto` | `lupyd.notification` | Notifications |
+| `chats.proto` | `lupyd.chat` | Legacy chat keys and sessions |
+| `lupyd-md.proto` | `lupyd.markdown` | Rich post bodies (mentions, hashtags, links, files) |
+
+## IDs
+
+Posts and other entities are identified by [ULIDs](https://github.com/ulid/spec):
+
+- **In URLs and query strings** — the 26-character Crockford base32 string.
+- **In protobuf bodies** — the 16 raw bytes.
+
+A ULID encodes its creation time, which is why feeds can paginate by ID and why
+[scheduled posts](/developers/server/api-reference/#post-post) are created by choosing a
+future ULID.
+
+## Posts
+
+### `FullPost`
+
+| # | Field | Type | Notes |
+| --- | --- | --- | --- |
+| 1 | `id` | bytes | 16-byte ULID. |
+| 2 | `title` | string | |
+| 3 | `by` | string | Author username; empty for anonymous posts. |
+| 4 | `post_type` | int32 | [`POST_TYPE`](#post-types) bitmask. |
+| 5 | `expiry` | uint64 | Unix time, milliseconds. |
+| 6 | `replying_to` | bytes | Parent post ID, if a reply. |
+| 8 | `body` | bytes | Serialised `PostBodies` — the full edit history; the last entry is current. |
+| 9 | `replies` | int32 | Reply count. |
+| 10 | `upvotes` | int32 | |
+| 11 | `downvotes` | int32 | |
+| 12 | `is_memory` | bool | Only `true` for the author. |
+| 13 | `vote` | `BoolValue` | The caller's vote, if any. |
+
+### `PostBody`
+
+A `oneof` of `plainText` (string), `markdown` (string), or `elements`
+(`lupyd.markdown.Elements`).
+
+### `CreatePostDetails`
+
+`title` (1), `body` (2, `PostBody`), `expiry` (3), `post_type` (4), `is_memory` (5),
+`replying_to` (6), `files` (7), `editing_from` (8), `id` (9). See
+[`POST /post`](/developers/server/api-reference/#post-post) for behaviour.
+
+### Post types
+
+`POST_TYPE` is a bitmask:
+
+| Value | Name | Meaning |
+| --- | --- | --- |
+| `1` | `SAFE` | Suitable for everyone. Cannot be combined with other bits. |
+| `2` | `ANONYMOUS` | Author is hidden. |
+| `4` | `NSFW` | Not safe for work. |
+| `8` | `DANGEROUS` | Potentially harmful content. |
+
+### Other post messages
+
+- `Votes` — `repeated Vote`; `Vote { bytes id; BoolValue val }`.
+- `PostReport` — `post_id`, `sevirity`, `description`.
+- `PostHashtag` — `name`, `total`; `PostHashtags` is a list.
+
+## Users
+
+| Message | Fields |
+| --- | --- |
+| `User` | `uname`, `bio` (serialised `PostBody`), `settings`, `followers` |
+| `Users` | `repeated User` |
+| `FullUser` | `uname`, `bio`, `followers`, `settings`, `uid`, `credits` |
+| `UpdateUserInfo` | `bio` (`PostBody`), `settings` |
+| `Relation` | `uname`, `relation` |
+| `Relations` | `repeated Relation` |
+
+### User settings bits
+
+| Bit | Meaning |
+| --- | --- |
+| `1` | Allow chats |
+| `2` | Notify on likes |
+| `4` | Notify on comments |
+| `8` | Notify on follows |
+| `16` | Profile picture is public |
+
+### Relation bits
+
+| Bit | Meaning |
+| --- | --- |
+| `1` | Follows |
+| `2` | Blocked |
+| `4` | Accepted (may message and call without a request) |
+
+## Notifications
+
+`Notification` has `id`, `seen`, and a `notificationType` `oneof` of `follow`,
+`comment`, or `like`. `Notifications` is a list.

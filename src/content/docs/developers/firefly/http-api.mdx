@@ -1,0 +1,176 @@
+---
+title: HTTP API reference
+description: Every Firefly REST endpoint — devices, keys, conversations, groups, calls, backups, and message requests.
+sidebar:
+  order: 4
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Base URL: `https://firefly.lupyd.com`. Bodies are protobuf messages from
+`package firefly` (`crates/protos/protobufs/message.proto` in the
+[`firefly`](https://github.com/lupyd/firefly) repository) unless noted. Protobuf
+responses set `Content-Type: application/x-protobuf; proto=firefly.<Message>`.
+
+Unless marked otherwise, every endpoint requires
+`Authorization: Bearer <access-token>` (see [Authentication](/developers/firefly/authentication/)).
+
+<Aside type="tip">
+	Most clients never call these endpoints directly — the
+	[client SDK](/developers/firefly/client-sdk/) does. This reference is for people
+	building or debugging a client.
+</Aside>
+
+## Conventions
+
+- **List parameters** are separated by `%2C` (a percent-encoded comma). Query values are
+  not otherwise URL-decoded.
+- **Write endpoints** return `200` with an empty body unless a response is listed.
+- **Errors** are plain text:
+
+| Status | Meaning |
+| --- | --- |
+| `400` | Missing or invalid parameter, or an MLS validation failure (for example a stale commit). |
+| `401` | Invalid token or missing permission. |
+| `403` | Not allowed — not a group member, insufficient group permission, or plan limit reached. |
+| `404` | Not found, or unknown path. |
+| `405` | Method not allowed on this path. |
+| `408` | Request exceeded the server timeout (30 seconds by default). |
+| `409` | Conflict — for example a snapshot head changed or a re-add was already claimed. |
+| `413` | Body exceeds the endpoint's limit. |
+| `429` | Too many requests for this resource. |
+
+## Identity and devices
+
+| Method and path | Body | Response | Notes |
+| --- | --- | --- | --- |
+| `GET /jwks.json` | — | JWKS (JSON) | **No auth.** Firefly's ES256 credential-signing keys. |
+| `POST /user/device` | `Address` (8 KiB) | `Address` | Register a device; returns its `id` and `deviceId`. |
+| `GET /user/devices` | — | `UserDevices` | |
+| `GET /user/addresses` | — | `Addresses` | |
+| `DELETE /user/device?id=<address_id>` | — | — | Removes the device and closes its session. |
+| `POST /sign?device_id=&address_id=` | raw public key (4 KiB) | `SignedToken` | Issue a [device credential](/developers/firefly/authentication/#signed-device-credentials). |
+
+## 1:1 messaging
+
+| Method and path | Body | Response | Notes |
+| --- | --- | --- | --- |
+| `POST /user/preKeyBundles` | `PreKeyBundleEntries` (512 KiB) | — | Upload Signal prekey bundles. |
+| `GET /user/preKeyBundles?other=<username>` | — | `PreKeyBundleEntries` | A user's bundles. Add `ids=` to restrict to addresses. |
+| `GET /user/preKeyBundles?ids=<address_ids>` | — | `PreKeyBundleEntries` | Bundles for specific addresses. |
+| `GET /user/preKeyBundles?id=<address_id>[&onlyIds=true]` | — | `PreKeyBundleEntries` | Your own bundles. |
+| `DELETE /user/preKeyBundles?addressId=&ids=` | — | — | |
+| `DELETE /user/allPreKeyBundles` | — | — | |
+| `POST /user/conversation?other=&settings=` | — | — | Start a conversation. |
+| `GET /user/conversations` | — | `Conversations` | |
+| `DELETE /user/conversations?ids=` | — | — | |
+| `DELETE /user/messages?until=<message_id>` | — | — | Delete stored messages up to an ID. |
+| `DELETE /user/message?conversationId=&messageId=` | — | — | Delete one stored message. |
+
+Messages themselves are sent over the [real-time connection](/developers/firefly/realtime/).
+
+## Message requests
+
+Control who may message and call you. An admin variant with `me=<username>` exists for
+server-to-server use.
+
+| Method and path | Body | Response | Notes |
+| --- | --- | --- | --- |
+| `GET /user/privacy` | — | `MessageRequestSettings` | |
+| `PUT /user/privacy` | `MessageRequestSettings` (1 KiB) | — | Set `requests_disabled`. `POST` is also accepted. |
+| `POST /user/accept?other=<username>` | — | — | Accept a user. |
+| `DELETE /user/accept?other=<username>` | — | — | Revoke acceptance. |
+| `GET /user/accepted` | — | `AcceptedUsers` | |
+| `POST /user/accepted` | `AcceptedUsers` (512 KiB) | count (text) | Accept many users at once. |
+| `POST /user/block?other=<username>&blocked=true` | — | — | Block or unblock (`blocked=false`). Also accepts a JSON body `{ other, blocked }`. |
+
+Usernames here are 3–30 characters of `A–Z`, `a–z`, `0–9`, or `_`.
+
+## Groups
+
+| Method and path | Body | Response | Notes |
+| --- | --- | --- | --- |
+| `POST /group` | `Group` (512 KiB) | `Group { id }` | Create a group; `state` is the MLS `GroupInfo`. |
+| `GET /group?id=` | — | `Group` | Name, description, settings, owner. |
+| `GET /groups` | — | `Groups` | Groups you belong to. |
+| `POST /group/update` | `Group`, or query `id`, `name`, `description` (64 KiB) | — | Rename or re-describe. |
+| `DELETE /group?id=` | — | — | |
+| `POST /group/upgrade?id=[&upgraded=true]` | — | — | Upgrade a group (requires a Pro or Organization plan). |
+| `GET /group/policy?id=` | — | JSON | Effective plan limits for the group. |
+| `GET /group/members/status?groupId=` | — | `GroupMembersOnlineStatus` | |
+| `POST /group/history/sync?id=&enabled=` | — | — | Turn [history sharing](/developers/firefly/encryption/#recovery-and-history) on or off. |
+
+### Key packages
+
+| Method and path | Body | Response |
+| --- | --- | --- |
+| `POST /group/keyPackages?address=` | `GroupKeyPackages` (512 KiB) | — |
+| `GET /group/keyPackages?address_id=&device_id=` | — | `GroupKeyPackages` (your own) |
+| `GET /group/keyPackages?other=<username>&all=true` | — | `GroupKeyPackages` (one per device) |
+| `GET /group/keyPackages?other=<username>&address=` | — | `GroupKeyPackage` |
+| `DELETE /group/keyPackages?address=&ids=` | — | — |
+
+### Membership and commits
+
+| Method and path | Body | Response | Notes |
+| --- | --- | --- | --- |
+| `POST /group/commitAndWelcome` | `GroupCommitAndWelcome` (4 MiB) | `GroupMessage { id, epoch, groupId }` | Add members. |
+| `POST /group/commit` | `GroupMessage` (512 KiB) | `GroupMessage { id, epoch, groupId }` | Any other commit. |
+| `GET /group/commits?groupIds=&startAfter=&limit=` | — | `GroupMessages` | `limit` ≤ 100. Use `groupId=` for a single group. |
+| `GET /group/syncCommits?address=[&cursor_group_id=&cursor_epoch=&limit=]` | — | `ServerMessage` | Paged commits across all of a device's groups. |
+| `POST /group/sync?address=&limit=` | `GroupSyncRequests` (512 KiB) | `GroupMessages` | Fetch messages after per-group cursors. |
+| `POST /group/syncUpdate?address=` | `GroupMemberUpdates` (512 KiB) | — | Report sync progress for many groups. |
+| `POST /group/member?address=` | `GroupMemberUpdate` (512 B) | — | Report your epoch and last message seen. |
+| `DELETE /group/member?uname=&groupId=&address=` | — | — | Remove a member device's record from the group. |
+| `GET /group/invites?address=` | — | `GroupInvites` | Pending Welcomes. |
+| `DELETE /group/invites?groupIds=&address=` | — | — | Dismiss invites. |
+| `GET /group/messages?groupId=&startAfter=&startBefore=[&ascending]` | — | `GroupMessages` | Page through stored ciphertext. |
+
+### Re-adding lost devices
+
+| Method and path | Response | Notes |
+| --- | --- | --- |
+| `POST /group/reAdd?address=[&groupIds=]` | — | Request to be re-added; group IDs in the query or as a JSON array body. |
+| `GET /group/reAdds?groupIds=&address=` | `GroupReAddRequests` | Pending requests in your groups. |
+| `POST /group/reAdd/claim?groupId=&address=&myAddress=` | `claimed` | Claim a request before re-adding. `409` if someone else claimed it. |
+| `DELETE /group/reAdd?groupId=&address=&myAddress=` | — | Clear a request. |
+
+### Pinned messages and history snapshots
+
+Encrypted snapshot blobs. The body is ciphertext (`application/octet-stream`); metadata
+travels in headers.
+
+| Method and path | Limit | Notes |
+| --- | --- | --- |
+| `GET /group/pinned/{groupId}` | — | Returns the current snapshot with an `X-Snapshot-Id` header. |
+| `POST /group/pinned/{groupId}` | 64 KiB | Headers: `X-Snapshot-Id`, `X-Expected-Snapshot`, `X-Message-Count`. |
+| `GET /group/messages_chunk/{groupId}/{id}` | — | `{id}` is 32 hex characters. |
+| `POST /group/messages_chunk/{groupId}/{id}` | 200 KiB | Also `X-Start-Id`, `X-End-Id`. |
+| `GET /direct-pins/{username}` | — | Pinned messages in a 1:1 conversation. |
+| `POST /direct-pins/{username}` | 64 KiB | Also `X-Ciphertext-Sha256` (64 hex characters); `X-Message-Count` 0–50. |
+
+Writes return `stored`. `409` means `X-Expected-Snapshot` no longer matches the current
+head — fetch, merge, and retry. Groups are limited to 16 snapshot writes per minute and
+256 MiB of snapshot storage (`429` beyond either).
+
+## Calls and meetings
+
+| Method and path | Body | Response | Notes |
+| --- | --- | --- | --- |
+| `GET /webrtcConfig` | — | JSON `RTCConfiguration` | ICE/TURN servers valid for one hour. |
+| `POST /meeting/create` | `CreateMeetingRequest` (16 KiB) | `{ session, participant_token }` | Start a group meeting. |
+| `POST /meeting/join` | `JoinMeetingRequest` | `{ session, participant_token }` | |
+| `POST /meeting/leave` | `LeaveMeetingRequest` | — | |
+| `POST /meeting/end` | `EndMeetingRequest` | — | |
+| `GET /meeting/active?groupId=&channelId=` | — | `GetActiveSessionResponse` | |
+
+## Encrypted backups
+
+| Method and path | Body | Response | Notes |
+| --- | --- | --- | --- |
+| `GET /backups/direct` | — | `DirectBackupState` | Current backup state. |
+| `GET /backups/direct?id=` | — | protobuf | One backup record. |
+| `POST /backups/direct` | `DirectBackupRequest` (2 MiB) | `stored` | `lease`, `put`, `commit`, and `release` actions. `409` on a lease conflict. |
+| `GET /backups/direct/object-policy?id=&method=&size=&hash=` | — | `204` or `403` | Authorise a CDN upload or download. |
+
+Blobs are at most 34 MiB and each account may store up to 512 MiB.

@@ -1,0 +1,54 @@
+---
+title: Lupyd Server overview
+description: The Lupyd social server — users, the social graph, posts, votes, and hashtags — and how clients talk to it.
+sidebar:
+  label: Overview
+  order: 0
+---
+
+import { CardGrid, LinkCard, Aside } from '@astrojs/starlight/components';
+
+The **Lupyd Server** (`lupyd-rust-server`) is the REST backend for Lupyd's social
+features: user profiles, the social graph (follow, block, accept), posts and replies,
+votes, saved posts, reports, trending hashtags, and notifications.
+
+It is written in Rust on [hyper](https://hyper.rs/) 1.x with a Tokio runtime and serves
+both HTTP/1.1 and HTTP/2 (cleartext h2c). PostgreSQL is its only datastore.
+
+## At a glance
+
+| | |
+| --- | --- |
+| **Protocol** | HTTP/1.1 and HTTP/2 |
+| **Encoding** | [Protocol Buffers](/developers/server/data-types/) request and response bodies |
+| **Authentication** | `Authorization: Bearer <JWT>` issued by Auth0 — see [Authentication](/developers/server/authentication/) |
+| **IDs** | [ULIDs](https://github.com/ulid/spec) as strings in URLs, 16 raw bytes in protobuf |
+| **CORS** | `Access-Control-Allow-Origin: *` on every response |
+| **Request timeout** | 2 seconds (then `408 Request Timeout`) |
+| **Default port** | `39201` |
+
+## Conventions
+
+- **Bodies are protobuf, not JSON.** Encode requests with the message named in the
+  [API reference](/developers/server/api-reference/) and decode responses the same way.
+  Some responses set `Content-Type: application/x-protobuf; proto=<message>`.
+- **Lists in query strings are comma-separated**, with the comma URL-encoded as `%2C`
+  (for example `?users=alice%2Cbob`).
+- **Caching:** public `GET` responses carry `Cache-Control` headers (typically
+  `public, max-age=60` for anonymous callers and `private, max-age=15` for authenticated
+  ones). Respect them in your client.
+- **Unknown routes** return `502` rather than `404`. Treat any `5xx` on an unexpected
+  path as "route does not exist".
+
+<Aside type="tip">
+	For end-to-end encrypted messaging, groups, devices, and push notifications, use
+	[Firefly](/developers/firefly/) instead. The Lupyd Server calls Firefly internally to
+	mirror blocks and accepted contacts.
+</Aside>
+
+<CardGrid>
+	<LinkCard title="Authentication" href="/developers/server/authentication/" description="Auth0 JWTs and permission bits." />
+	<LinkCard title="API reference" href="/developers/server/api-reference/" description="Every endpoint, parameter, and response." />
+	<LinkCard title="Data types" href="/developers/server/data-types/" description="Protobuf messages and bitmasks." />
+	<LinkCard title="Self-hosting" href="/developers/server/self-hosting/" description="Build, configure, and run the server." />
+</CardGrid>

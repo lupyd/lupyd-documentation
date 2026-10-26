@@ -1,0 +1,161 @@
+---
+title: Self-hosting
+description: Build, configure, and run the Firefly server.
+sidebar:
+  order: 6
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+The Firefly server lives in the `firefly-mls` repository (crate `firefly-server`).
+
+## Requirements
+
+- Rust **nightly**.
+- PostgreSQL 16.
+- An Auth0 tenant issuing tokens for the audience `https://lupyd.com`.
+- A Firebase project for push notifications.
+- Optional: Cloudflare TURN (calls) and RealtimeKit (meetings), and a TLS certificate
+  for WebTransport.
+
+## Run locally
+
+<Steps>
+
+1. Start PostgreSQL. The Compose file loads the schema from `initdb.sql`:
+
+   ```sh
+   docker compose up -d   # postgres:16-alpine on localhost:54321
+   ```
+
+2. Run the server against the test configuration, in emulator mode:
+
+   ```sh
+   ./run-test-server.sh   # PORT=39209, EMULATOR_MODE, NO_TOKEN_VERIFICATION, RESET_DB
+   ```
+
+   Or run it with your own `.env`:
+
+   ```sh
+   cargo run -p firefly-server
+   ```
+
+</Steps>
+
+In emulator mode with `NO_TOKEN_VERIFICATION=true`, the bearer token *is* the username
+(`Authorization: Bearer alice`), which makes local testing easy.
+
+<Aside type="danger">
+	`RESET_DB=true` runs `initdb.sql`, which begins with `DROP SCHEMA public CASCADE`.
+	`EMULATOR_MODE` and `NO_TOKEN_VERIFICATION` disable security checks. Never set any of
+	them in production.
+</Aside>
+
+## Docker
+
+The `Dockerfile` produces a static musl binary in a `scratch` image. Expose the port on
+both TCP (HTTP/WebSocket) and UDP (WebTransport):
+
+```sh
+docker build -t firefly-server .
+docker run --env-file .env -p 39205:39205/tcp -p 39205:39205/udp firefly-server
+```
+
+## Database migrations
+
+`initdb.sql` bootstraps a new database. On every start, the server also applies
+versioned history migrations (tracked in `firefly_history_migrations`, under an advisory
+lock), so upgrading only requires deploying the new binary.
+
+## Configuration
+
+`.env` is loaded if present. Values may be quoted, and `\n` becomes a newline.
+
+### Core
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `PORT` | no | `39205` | TCP port for HTTP and WebSocket. |
+| `DB_CONN_STR` | yes | — | PostgreSQL connection string. Any `sslmode` other than `disable` requires TLS. |
+| `DB_CERT` | no | — | PEM CA certificate for PostgreSQL TLS. |
+| `DB_POOL_SIZE` | no | `100` | Maximum database connections. |
+| `FIREFLY_BASE_URL` | yes | — | This server's public base URL. Used to fetch its own `/jwks.json` when validating MLS credentials. |
+| `REQUEST_TIMEOUT_IN_SECS` | no | `30` | Per-request timeout. |
+| `KEY_VALID_DURATION_IN_SECS` | no | `2592000` | Lifetime of credential-signing keys and of issued device credentials (30 days). |
+| `RUST_LOG` | no | — | Log filter. |
+
+### Authentication
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `AUTH0_DOMAIN` | yes | Auth0 tenant domain (for JWKS). |
+| `AUTH0_ISSUER` | yes | Expected `iss` claim. |
+| `SECRET_ADMIN_TOKEN` | yes | Admin secret. The [Lupyd Server](/developers/server/self-hosting/) sends this as its `ADMIN_KEY`. |
+
+### Integrations
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `FB_PROJECT_ID`, `FB_CLIENT_MAIL`, `FB_PRIVATE_KEY` | yes | Firebase service account for push notifications. |
+| `TURN_TOKEN_ID`, `TURN_API_TOKEN` | must be set (may be empty) | Cloudflare TURN credentials for `/webrtcConfig`. |
+| `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_REALTIME_APP_ID`, `CLOUDFLARE_API_TOKEN` | no | Cloudflare RealtimeKit; meetings are unavailable without them. |
+| `SUBSCRIPTIONS_URL` | no (`http://127.0.0.1:8088`) | Subscription service used to enforce plan limits. |
+| `SUBSCRIPTIONS_AUTHORIZATION` | yes, outside emulator mode | `Authorization` header for the subscription service. Group operations fail closed without it. |
+| `FIREFLY_CDN_URL` | yes for backups | HTTPS base URL of the encrypted blob CDN. |
+| `ENFORCE_REQUEST_GATING` | no (`true`) | Set `false` to let anyone call anyone. |
+
+### WebTransport
+
+WebTransport starts only when a certificate and key are configured.
+
+| Variable | Description |
+| --- | --- |
+| `WT_CERT_PEM` or `WT_CERT_PATH` | TLS certificate (PEM content or path). |
+| `WT_KEY_PEM` or `WT_KEY_PATH` | TLS private key. |
+| `WT_PORT` | UDP port. Defaults to `PORT`. |
+| `WT_HOST` | If set, the request `:authority` must match. Falls back to `SERVER_HOST`, `HOST`, `WT_SNI`, or `SERVER_SNI`. |
+
+### Development only
+
+| Variable | Description |
+| --- | --- |
+| `EMULATOR_MODE` | Stubs subscriptions, returns STUN-only WebRTC config, and relaxes checks. Read at build time and at runtime. |
+| `NO_TOKEN_VERIFICATION` | With `EMULATOR_MODE`, treats the bearer token as the username. |
+| `RESET_DB` | Drops and recreates the schema on start. |
+
+## Admin API
+
+Admin endpoints compare the **entire** `Authorization` header to `SECRET_ADMIN_TOKEN`
+(no `Bearer` prefix). Keep them off the public internet.
+
+| Method and path | Description |
+| --- | --- |
+| `POST /notification/send` | Send a push notification. JSON body `{ username, title, body, data? }`. |
+| `POST /user/block?me=&other=&blocked=` | Mirror a block from the Lupyd Server. |
+| `POST`/`DELETE /user/accept?me=&other=` | Mirror an accept. |
+| `POST /user/accepted?me=` | Bulk-mirror accepts (`AcceptedUsers`). |
+| `GET /group/{id}`, `GET /group/invite/{inviteId}` | Group details. |
+| `GET /group/usage?owner=&start_time=&end_time=` | Usage for billing (Unix seconds). |
+| `GET /websocketState` | Connected address IDs. |
+| `GET /dbPoolState` | Database pool statistics. |
+
+## Testing
+
+```sh
+cargo test --test integration_tests -- --skip test_group_meetings_lifecycle
+```
+
+The meetings test needs Cloudflare credentials. `./test.sh --docker` runs the suite
+against throwaway PostgreSQL and server containers.
+
+## Limits
+
+| Limit | Value |
+| --- | --- |
+| Devices per user | 5 |
+| Call requests | 20 per user per minute |
+| Group snapshot writes | 16 per group per minute |
+| Group snapshot storage | 256 MiB per group |
+| Backup blob size | 34 MiB |
+| Backup storage | 512 MiB per account |
+| Largest request body | 4 MiB (`/group/commitAndWelcome`) |

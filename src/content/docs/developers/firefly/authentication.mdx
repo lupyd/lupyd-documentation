@@ -1,0 +1,90 @@
+---
+title: Authentication and devices
+description: How Firefly authenticates users, registers devices, and issues signed MLS credentials.
+sidebar:
+  order: 1
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+Firefly uses two layers of identity:
+
+1. **User authentication** — an Auth0 access token, sent as a `Bearer` token on HTTP
+   requests and as a query parameter on real-time connections.
+2. **Device credentials** — each device gets an MLS credential signed by Firefly that
+   binds the device's signature key to the user's identity.
+
+## User tokens
+
+Send the same Auth0 access token used for the [Lupyd Server](/developers/server/authentication/):
+
+```http
+Authorization: Bearer <access-token>
+```
+
+Firefly verifies the RS256 signature against the Auth0 JWKS and checks `exp`, `iss`, and
+that `aud` contains `https://lupyd.com`. The token must also carry a non-empty `uname`
+and non-zero `perms` — that is, the user must have finished
+[sign-up](/developers/server/authentication/#sign-up-flow).
+
+Failures return `401` with `You are missing some permissions`.
+
+## Registering a device
+
+Every device has an **address**: a numeric `address_id` plus a small `device_id`. Both
+are assigned by the server.
+
+<Steps>
+
+1. **Register the device.** `POST /user/device` with a `firefly.Address` body. The server
+   sets the username from your token and returns the `Address` with its assigned `id`
+   and `deviceId`.
+
+   A user can have at most **five** devices. Registering a sixth removes the device that
+   connected least recently.
+
+2. **Get a signed credential.** Generate a P-256 signature key pair on the device, then
+   call `POST /sign?device_id=<device_id>&address_id=<address_id>` with the raw public
+   key as the body (max 4 KiB). The server returns a `firefly.SignedToken`.
+
+3. **Use the credential in MLS.** The serialised `SignedToken` is the device's MLS
+   credential (custom credential type `40001`) in key packages and group leaves.
+
+4. **Upload key material** — MLS key packages and Signal prekey bundles. See
+   [End-to-end encryption](/developers/firefly/encryption/).
+
+5. **Connect** to the [real-time endpoint](/developers/firefly/realtime/).
+
+</Steps>
+
+## Signed device credentials
+
+`SignedToken` has three fields:
+
+| Field | Description |
+| --- | --- |
+| `kid` | ID of the Firefly signing key. |
+| `payload` | Serialised `AuthToken`. |
+| `signature` | ES256 (ECDSA P-256, SHA-256) signature over `payload`. |
+
+`AuthToken` contains `username`, `credential` (the device's public signature key),
+`address_id`, `device_id`, and `valid_until`. Credentials are valid for 30 days by
+default; request a new one before it expires.
+
+To verify a credential — as every group member does when someone joins:
+
+1. Fetch Firefly's public keys from `GET /jwks.json` (EC keys, `crv: P-256`,
+   `alg: ES256`; cacheable per the `Cache-Control` header).
+2. Verify `signature` over `payload` with the key matching `kid`.
+3. Check `valid_until` has not passed.
+4. Check `AuthToken.credential` equals the MLS leaf's signature key.
+
+The MLS identity of a member is `address_id ‖ device_id ‖ username`.
+
+## Managing devices
+
+| Request | Description |
+| --- | --- |
+| `GET /user/devices` | List your devices. |
+| `GET /user/addresses` | List your device addresses (`firefly.Addresses`). |
+| `DELETE /user/device?id=<address_id>` | Remove a device. Its real-time session is closed immediately. |

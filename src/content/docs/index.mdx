@@ -1,0 +1,69 @@
+---
+title: Introduction to Lupyd
+description: Lupyd is a privacy-first platform that unifies secure messaging, social content, and business discovery for individuals and organisations.
+template: splash
+hero:
+  tagline: A privacy-first platform for communication, content, and business — built on end-to-end encryption.
+  image:
+    file: ../../assets/logo.svg
+  actions:
+    - text: Get started
+      link: /getting-started/installation/
+      icon: right-arrow
+    - text: Developer docs
+      link: /developers/
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+**Lupyd** is a unified digital platform for individuals and businesses that combines
+communication, content, and cloud-driven services. It bridges social interaction and
+professional engagement so people can create, connect, and collaborate in a secure
+environment.
+
+At its core, Lupyd puts privacy and trust first. Conversations are protected with
+end-to-end encryption, so messages stay strictly between their intended participants.
+Unlike platforms that monetise user data, Lupyd never sells personal information.
+
+<CardGrid>
+	<Card title="Secure messaging" icon="approve-check">
+		One-to-one chats use the Signal protocol and group chats use
+		[MLS](/developers/firefly/encryption/) — both end-to-end encrypted.
+	</Card>
+	<Card title="Social content" icon="pencil">
+		Publish posts, follow creators, vote, and discover trends without your data
+		being sold.
+	</Card>
+	<Card title="Business discovery" icon="puzzle">
+		Businesses showcase services and connect with audiences organically.
+	</Card>
+	<Card title="Every platform" icon="laptop">
+		Android, iOS, Windows, Linux, macOS, and the web — one consistent experience.
+	</Card>
+</CardGrid>
+
+## Next steps
+
+<CardGrid>
+	<LinkCard
+		title="Install Lupyd"
+		description="Get the app on your phone or desktop in under a minute."
+		href="/getting-started/installation/"
+	/>
+	<LinkCard
+		title="Explore core features"
+		description="Messaging, groups, content, and privacy controls."
+		href="/guides/features/"
+	/>
+	<LinkCard
+		title="Build on Lupyd"
+		description="Architecture overview and API references for Firefly and the Lupyd server."
+		href="/developers/"
+	/>
+	<LinkCard
+		title="FAQ & support"
+		description="Answers to common questions and how to reach us."
+		href="/support/faq/"
+	/>
+</CardGrid>

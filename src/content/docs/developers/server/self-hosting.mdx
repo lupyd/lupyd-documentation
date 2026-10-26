@@ -1,0 +1,113 @@
+---
+title: Self-hosting
+description: Build, configure, and run the Lupyd Server locally or in production.
+sidebar:
+  order: 4
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+## Requirements
+
+- Rust **nightly** (pinned by `rust-toolchain.toml`).
+- PostgreSQL 16 with the `pgvector`, `pgcrypto`, `uuid-ossp`, and `tsm_system_rows`
+  extensions. The schema lives in the `lupyd-psql` repository (`initdb.sql`).
+- An Auth0 tenant (see [Authentication](/developers/server/authentication/)).
+- A running [Firefly](/developers/firefly/self-hosting/) server, for push notifications
+  and to mirror blocks and accepted contacts.
+
+## Run locally
+
+<Steps>
+
+1. Start PostgreSQL with the schema loaded:
+
+   ```sh
+   docker compose up -d   # pgvector/pgvector:pg16 on localhost:5433
+   ```
+
+2. Create a `.env` file (see [configuration](#configuration)).
+
+3. Run the server:
+
+   ```sh
+   cargo run --bin lupyd-rust-server
+   ```
+
+4. Check it is up:
+
+   ```sh
+   curl http://localhost:39201/hello
+   ```
+
+</Steps>
+
+## Docker
+
+The `Dockerfile` builds a static musl binary into a `scratch` image that listens on port
+`39201`. `.env` files and keys are excluded from the image, so pass configuration as
+environment variables at runtime:
+
+```sh
+docker build -t lupyd-rust-server .
+docker run --env-file .env.prod -p 39201:39201 lupyd-rust-server
+```
+
+## Configuration
+
+Values may be quoted, and `\n` sequences are converted to newlines.
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `PORT` | yes | — | TCP port to listen on (`0.0.0.0`). Conventionally `39201`. |
+| `DB_CONN_STR` | yes | — | PostgreSQL connection string. Any `sslmode` other than `disable` requires TLS. |
+| `DB_CERT` | no | — | Path to a PEM CA certificate for PostgreSQL TLS. |
+| `DB_POOL_SIZE` | no | `100` | Maximum database connections. |
+| `AUTH0_DOMAIN` | yes | — | Auth0 tenant domain, used for JWKS and the Management API. |
+| `AUTH0_ISSUER` | yes | — | Expected `iss` claim (exact match). |
+| `AUTH0_MGT_CLIENT_ID` | yes | — | Auth0 Management API client ID (sign-up, account deletion, session revocation). |
+| `AUTH0_MGT_CLIENT_SECRET` | yes | — | Auth0 Management API client secret. |
+| `ADMIN_KEY` | yes | — | Shared secret for admin routes and for calling Firefly's admin API. Must match Firefly's `SECRET_ADMIN_TOKEN`. |
+| `FIREFLY_URL` | no | `http://127.0.0.1:39205` | Firefly base URL. |
+| `SUBSCRIPTIONS_URL` | no | `http://127.0.0.1:8088` | Subscription service base URL. |
+| `SUBSCRIPTIONS_AUTHORIZATION` | yes | — | `Authorization` header value sent to the subscription service. |
+| `USER_RATELIMIT` | yes | — | Per-user rate limit as `requests/seconds`, for example `100/10`. |
+| `CACHE_LIMIT` | no | `1000` | Size of the per-user rate-limit cache. Must be greater than `0`. |
+| `RUST_LOG` | no | — | Log filter, for example `info`. |
+| `TESTING` | no | — | **Test only.** Disables token verification. Never set in production. |
+
+`EMULATOR_MODE=true` is a **build-time** flag that removes `Cache-Control` headers for
+local development. Set it in the environment when running `cargo build`; it has no effect
+at runtime.
+
+### Command-line flags
+
+| Flag | Description |
+| --- | --- |
+| `--backfill-accepts` | Mirror every accepted relation to Firefly, then exit. The server also runs this once automatically per database on first start. |
+
+## Admin endpoints
+
+Admin routes authenticate with the raw `ADMIN_KEY` (no `Bearer` prefix). Do not expose
+them publicly; restrict them at your proxy.
+
+| Route | Header | Description |
+| --- | --- | --- |
+| `GET /timing` | `AUTHORIZE_ADMIN: <ADMIN_KEY>` | Database pool and query latency. |
+| `GET /admin/user-subscription/{username}` | `Authorization: <ADMIN_KEY>` | A user's subscription, as JSON. |
+
+<Aside type="caution">
+	The `AUTHORIZE_ADMIN` header contains an underscore. Some proxies, including nginx by
+	default, drop such headers — enable `underscores_in_headers on;` if you need `/timing`
+	behind nginx.
+</Aside>
+
+## Testing
+
+```sh
+docker compose up -d
+cargo test
+```
+
+Integration tests load `.env.test`, enable `TESTING`, and start the server on a random
+port against the Compose database.

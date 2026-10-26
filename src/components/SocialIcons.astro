@@ -1,0 +1,44 @@
+---
+import Default from '@astrojs/starlight/components/SocialIcons.astro';
+
+// Mirrors the site navigation on www.lupyd.com.
+const navLinks = [
+	{ href: 'https://www.lupyd.com', label: 'About' },
+	{ href: 'https://billing.lupyd.com', label: 'Pricing' },
+	{ href: 'https://blogs.lupyd.com', label: 'Blogs' },
+	{ href: 'https://careers.lupyd.com', label: 'Careers' },
+];
+---
+
+<nav class="site-nav" aria-label="Lupyd">
+	{navLinks.map(({ href, label }) => <a href={href}>{label}</a>)}
+</nav>
+<Default />
+
+<style>
+	.site-nav {
+		display: flex;
+		align-items: center;
+		gap: 1.25rem;
+	}
+	.site-nav a {
+		color: var(--sl-color-gray-2);
+		font-size: var(--sl-text-sm);
+		font-weight: 500;
+		text-decoration: none;
+		transition: color 0.15s;
+	}
+	.site-nav a:hover {
+		color: var(--sl-color-white);
+	}
+	/* In the top bar, only show the links when there is room beside the search box.
+	   The mobile menu footer always shows them. */
+	@media (max-width: 72rem) {
+		:global(.header) .site-nav {
+			display: none;
+		}
+	}
+	:global(.header) .site-nav {
+		margin-inline-end: 0.5rem;
+	}
+</style>

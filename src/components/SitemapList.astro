@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+
+const sections = [
+	{ title: 'Getting started', prefix: 'getting-started/' },
+	{ title: 'User guides', prefix: 'guides/' },
+	{ title: 'Developers', prefix: 'developers/', exclude: ['developers/firefly', 'developers/server'] },
+	{ title: 'Firefly (messaging)', prefix: 'developers/firefly' },
+	{ title: 'Lupyd Server (social)', prefix: 'developers/server' },
+	{ title: 'Support', prefix: 'support/' },
+];
+
+const docs = (await getCollection('docs')).filter((e) => e.id !== 'sitemap');
+const order = (e: (typeof docs)[number]) => e.data.sidebar.order ?? 999;
+
+const grouped = sections.map((s) => ({
+	title: s.title,
+	pages: docs
+		.filter(
+			(e) =>
+				(e.id === s.prefix.replace(/\/$/, '') || e.id.startsWith(s.prefix)) &&
+				!s.exclude?.some((x) => e.id.startsWith(x)),
+		)
+		.sort((a, b) => order(a) - order(b) || a.data.title.localeCompare(b.data.title)),
+}));
+---
+
+<p><a href="/">Introduction to Lupyd</a> — the documentation home page.</p>
+{
+	grouped.map((group) => (
+		<>
+			<h2>{group.title}</h2>
+			<ul>
+				{group.pages.map((page) => (
+					<li>
+						<a href={`/${page.id}/`}>{page.data.title}</a> — {page.data.description}
+					</li>
+				))}
+			</ul>
+		</>
+	))
+}

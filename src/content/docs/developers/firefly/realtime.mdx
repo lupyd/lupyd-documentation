@@ -1,0 +1,140 @@
+---
+title: Real-time connection
+description: Connect to Firefly over WebSocket or WebTransport, frame protobuf messages, and stay in sync.
+sidebar:
+  order: 2
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+Each registered device keeps one real-time connection to Firefly. It receives messages,
+invites, commits, call signals, and RPC responses over this connection, and uses it to
+send messages.
+
+Two transports carry the same protobuf messages:
+
+| Transport | URL scheme | Notes |
+| --- | --- | --- |
+| **WebSocket** | `wss://` | Works everywhere. |
+| **WebTransport** | `https://` (HTTP/3 over QUIC/UDP) | Lower latency and independent streams. Available when the server has WebTransport enabled. |
+
+The client SDK tries WebTransport first and falls back to WebSocket. Set
+`FIREFLY_TRANSPORT=ws` or `wt` to force one.
+
+## Connecting
+
+```text
+wss://<firefly-host>/?uid=<address_id>&device_id=<device_id>&last_synced_upto=<message_id>&token=<access-token>
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `uid` | u64 | The device's `address_id` from [device registration](/developers/firefly/authentication/#registering-a-device). |
+| `device_id` | u8 | The device's `device_id`. |
+| `last_synced_upto` | u64 | ID of the last 1:1 message this device has stored, or `0`. The server resends anything newer. |
+| `token` | string | Auth0 access token. Browsers cannot set headers on WebSocket requests, so the token goes in the query string. |
+
+| Status | Cause |
+| --- | --- |
+| `400` | A required parameter is missing or invalid. |
+| `401` | The token is invalid, or the address does not belong to the user. |
+
+A new connection for the same address replaces the previous one.
+
+## Messages
+
+Every frame carries one protobuf message:
+
+- **Client → server:** `firefly.ClientMessage`
+- **Server → client:** `firefly.ServerMessage`
+
+Both are `oneof` envelopes.
+
+<Tabs>
+	<TabItem label="WebSocket">
+		Each message is one **binary** WebSocket frame. Text frames and frames that fail to
+		decode are ignored.
+	</TabItem>
+	<TabItem label="WebTransport">
+		- **Server push:** a single server-opened unidirectional stream carrying
+		  length-prefixed `ServerMessage`s (4-byte big-endian length, then the message).
+		- **Fire-and-forget:** one `ClientMessage` per client-opened unidirectional stream
+		  (max 1 MiB).
+		- **RPC:** one bidirectional stream per `ClientMessage.request` (max 16 MiB). The
+		  server writes a single length-prefixed `ServerMessage` containing the `response`.
+	</TabItem>
+</Tabs>
+
+### Requests and responses
+
+To call an RPC, send `ClientMessage { request: Request { id, <payload> } }` with a
+client-chosen `id`. The server replies with `ServerMessage { response: Response { id, … } }`
+carrying the same `id`. Failures set `Response.error` to `{ errorCode, error }`, where
+`errorCode` follows HTTP semantics:
+
+| `errorCode` | Meaning |
+| --- | --- |
+| `400` | Invalid request (for example a sender address that is not yours). |
+| `403` | The recipient has disabled message requests, or one of you blocked the other. |
+| `404` | Conversation not found. |
+| `500` | Server error. |
+
+| RPC payload | Purpose |
+| --- | --- |
+| `uploadUserMessage` | Send an encrypted 1:1 message to one or more devices. |
+| `uploadGroupMessage` | Send an encrypted MLS application message to a group. |
+| `userOnlineStatus` | Online status for up to 32 usernames, returned as a bitmask. |
+| `createJoinLink`, `joinViaLink` | Create and use group invite links. |
+| `createMeeting`, `joinMeeting`, `leaveMeeting`, `endMeeting`, `getActiveSession` | Group meetings. |
+| `createHistoryRequest`, `claimHistoryRequest`, `publishHistoryChunk`, `approveHistoryChunk`, `disapproveHistoryChunk`, `getHistoryChunks`, `getPendingHistoryRequests`, `closeHistoryRequest` | Share encrypted group history with new devices or members. |
+
+### Fire-and-forget messages
+
+| `ClientMessage` field | Purpose |
+| --- | --- |
+| `readUserMessagesUpto` | Read receipt; forwarded to the other user's online devices. |
+| `callSignal` | WebRTC call signalling (`REQUEST`, `ANSWER`, `REJECT`, `CANCEL`, `HANGUP`, `DISMISS`, `ICECANDIDATE`). |
+| `verifiedUserMessage` | Internal client acknowledgement. |
+
+### Server pushes
+
+`ServerMessage` may contain `userMessage`, `userMessages`, `groupMessage`,
+`groupMessages`, `groupInvite`, `groupCommits`, `groupReAddRequests`,
+`groupJoinRequests`, `readUserMessagesUpto`, `callSignal`, `groupMeetingSignal`,
+`groupHistorySignal`, or `response`.
+
+## Initial sync
+
+After connecting, the server:
+
+1. Marks the device online.
+2. Delivers pending call requests from the last 45 seconds.
+3. Streams missed data in pages of 100: group commits first, then group messages, then
+   1:1 messages newer than `last_synced_upto`.
+
+Process commits in order before decrypting group messages for the same epoch.
+
+## Keepalive and reconnection
+
+The reference client:
+
+- Sends a WebSocket ping every **10 seconds**.
+- Treats the connection as dead after **30 seconds** without receiving anything, and
+  reconnects.
+- Times out connection attempts after **15 seconds**.
+- On `401` or `403` during the handshake, refreshes the access token before reconnecting.
+
+WebTransport uses QUIC keepalives (server idle timeout 60 seconds).
+
+## Calls
+
+`callSignal` messages are relayed between users. Calls from someone the callee has not
+accepted are rejected with `CALL_REJECT_NOT_ACCEPTED`, and each user can start at most
+**20 call requests per minute**. Fetch TURN credentials with
+[`GET /webrtcConfig`](/developers/firefly/http-api/#calls-and-meetings).
+
+<Aside type="note">
+	A user is *accepted* once the callee accepts them, either on the
+	[Lupyd Server](/developers/server/api-reference/#put-relation) (`relation=accept`) or
+	with [`POST /user/accept`](/developers/firefly/http-api/#message-requests).
+</Aside>

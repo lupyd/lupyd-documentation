@@ -1,50 +1,55 @@
-# React + TypeScript + Vite
+# Lupyd Documentation
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Source for [docs.lupyd.com](https://docs.lupyd.com), built with [Astro](https://astro.build),
+[Starlight](https://starlight.astro.build), and [Pagefind](https://pagefind.app) search.
+It is deployed to Cloudflare Workers static assets.
 
-Currently, two official plugins are available:
+## Requirements
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js 22.12 or newer
+- [pnpm](https://pnpm.io) (the version is pinned in `package.json`; run `corepack enable`)
 
-## Expanding the ESLint configuration
+## Commands
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+| Command | Action |
+| --- | --- |
+| `pnpm install` | Install dependencies. |
+| `pnpm dev` | Start the dev server at `http://localhost:4321`. |
+| `pnpm build` | Build the static site and the Pagefind search index into `dist/`. |
+| `pnpm preview` | Serve the production build locally (search works only here, not in `dev`). |
+| `pnpm check` | Type-check content and components. |
+| `pnpm deploy` | Build and deploy to Cloudflare with Wrangler. |
 
-- Configure the top-level `parserOptions` property like this:
+## Project layout
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```text
+src/
+├── assets/            Images used in content (logo)
+├── content/docs/      All pages, as Markdown/MDX — URL = file path
+│   ├── getting-started/
+│   ├── guides/        End-user guides
+│   ├── developers/
+│   │   ├── firefly/   Firefly messaging (client libs + firefly-mls server)
+│   │   └── server/    lupyd-rust-server (social REST API)
+│   └── support/
+├── styles/custom.css  Brand overrides for Starlight
+└── content.config.ts
+public/                Copied as-is (favicon, robots.txt)
+astro.config.mjs       Site config, sidebar, and redirects from old URLs
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Writing docs
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+- Every page needs `title` and `description` frontmatter. The description is used for
+  search results and social previews.
+- Use `sidebar.order` in frontmatter to order pages within a section.
+- Use Starlight components (`Aside`, `Steps`, `Tabs`, `Card`, `LinkCard`) from
+  `@astrojs/starlight/components` in `.mdx` files.
+- Link between pages with absolute paths that end in a slash, such as `/developers/firefly/`.
+- Developer pages describe what the code does. When you change routes, env vars, or
+  limits in `firefly`, `firefly-mls`, or `lupyd-rust-server`, update the matching page in
+  `src/content/docs/developers/`.
+- Never copy secrets, keys, or `.env` values from the service repositories.
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+The sitemap (`sitemap-index.xml`) and search index are generated at build time. Old URLs
+from the previous site redirect through `redirects` in `astro.config.mjs`.

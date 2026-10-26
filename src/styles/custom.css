@@ -1,0 +1,12 @@
+/* Lupyd brand: monochrome with a neutral accent. */
+:root {
+	--sl-color-accent-low: #1f1f1f;
+	--sl-color-accent: #8a8a8a;
+	--sl-color-accent-high: #ededed;
+}
+
+:root[data-theme='light'] {
+	--sl-color-accent-low: #ececec;
+	--sl-color-accent: #111111;
+	--sl-color-accent-high: #000000;
+}

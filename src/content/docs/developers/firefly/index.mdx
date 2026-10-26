@@ -1,0 +1,53 @@
+---
+title: Firefly overview
+description: Firefly is Lupyd's end-to-end encrypted messaging stack — client libraries, protocol, and delivery server.
+sidebar:
+  label: Overview
+  order: 0
+---
+
+import { CardGrid, LinkCard, Aside } from '@astrojs/starlight/components';
+
+**Firefly** is Lupyd's end-to-end encrypted messaging stack. It provides:
+
+- **1:1 messaging** using the Signal protocol (libsignal) with prekey bundles.
+- **Group messaging** using [Messaging Layer Security (MLS, RFC 9420)](https://www.rfc-editor.org/rfc/rfc9420)
+  with Lupyd-specific roles, channels, and permissions.
+- **Multi-device** support — up to five devices per user, each with its own keys.
+- **Real-time delivery** over WebSocket or WebTransport (HTTP/3).
+- **Voice/video calls and group meetings**, encrypted backups, pinned messages, and
+  shareable group history.
+
+## Components
+
+| Repository | Contents |
+| --- | --- |
+| `firefly` | Client libraries and the protocol schema: `firefly-protos` (protobuf), `firefly-core` (MLS identity, rules, extensions), `firefly-client` (high-level async Rust client), and `firefly-client-node` / `firefly-client-js` (WebAssembly + TypeScript bindings). |
+| `firefly-mls` | The Firefly server (`firefly-server`): HTTP API, WebSocket and WebTransport endpoints, PostgreSQL storage. |
+
+<Aside type="tip">
+	Most applications should use the [client SDK](/developers/firefly/client-sdk/), which
+	implements key management, MLS, Signal sessions, and the real-time protocol. Use the
+	raw [HTTP API](/developers/firefly/http-api/) only if you are building a new client
+	library.
+</Aside>
+
+## At a glance
+
+| | |
+| --- | --- |
+| **Protocols** | HTTP/1.1, HTTP/2, WebSocket, WebTransport (HTTP/3 over QUIC) |
+| **Encoding** | Protobuf, package `firefly` (`crates/protos/protobufs/message.proto`) |
+| **Authentication** | Auth0 `Bearer` JWT, plus a Firefly-signed device credential |
+| **MLS ciphersuite** | `P256_AES128` (MLS_128_DHKEMP256_AES128GCM_SHA256_P256) |
+| **Default port** | `39205` (TCP for HTTP/WebSocket; UDP for WebTransport) |
+| **Request timeout** | 30 seconds by default |
+
+<CardGrid>
+	<LinkCard title="Authentication and devices" href="/developers/firefly/authentication/" description="Tokens, device registration, and signed credentials." />
+	<LinkCard title="Real-time connection" href="/developers/firefly/realtime/" description="WebSocket and WebTransport framing, sync, and keepalive." />
+	<LinkCard title="End-to-end encryption" href="/developers/firefly/encryption/" description="MLS groups, Signal sessions, roles, and permissions." />
+	<LinkCard title="HTTP API reference" href="/developers/firefly/http-api/" description="Every REST endpoint." />
+	<LinkCard title="Client SDK" href="/developers/firefly/client-sdk/" description="Rust and JavaScript libraries." />
+	<LinkCard title="Self-hosting" href="/developers/firefly/self-hosting/" description="Run and configure the Firefly server." />
+</CardGrid>

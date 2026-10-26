@@ -1,0 +1,68 @@
+---
+title: Group chats
+description: Create and manage end-to-end encrypted group conversations on Lupyd.
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Lupyd group chats bring people together through secure, real-time communication —
+for casual conversations, team collaboration, or business discussions.
+
+Every group is end-to-end encrypted using the [Messaging Layer Security (MLS)
+protocol](/developers/firefly/encryption/). Messages are encrypted on your device and can
+only be decrypted by current group members; Lupyd's servers relay ciphertext and never
+see message contents.
+
+## Key capabilities
+
+### Create and manage groups
+
+- Create a group with multiple participants.
+- Add or remove members.
+- Assign roles (admin or member).
+- Customise the group name and profile.
+
+### Secure group messaging
+
+- End-to-end encrypted conversations.
+- Messages are readable only by group members.
+- No data is shared with third parties.
+
+### Calls and scheduling
+
+- Group voice and video calls with encrypted sessions.
+- Schedule calls or discussions in advance, with reminders sent to participants.
+
+### Media sharing
+
+- Share images, videos, and files within the group.
+
+### Multi-device sync
+
+- Each of your devices joins the group as its own MLS member, so conversations stay in
+  sync between mobile and desktop.
+
+### Notifications
+
+- Real-time notifications for messages and calls, with per-group controls.
+
+<Aside type="note" title="Membership changes rotate keys">
+	When someone joins or leaves a group, the group's encryption keys are updated. Removed
+	members cannot read messages sent after they left. New members only see earlier
+	messages if the group has history sharing enabled, in which case existing members
+	share an encrypted copy of the history with them.
+</Aside>
+
+## Privacy and trust
+
+- Conversations are never exposed outside the group.
+- Interactions are not tracked or sold.
+- Strong encryption keeps conversations confidential.
+
+## Use cases
+
+- **Personal groups** — stay connected with friends and family.
+- **Business collaboration** — coordinate with teams and schedule meetings in one place.
+- **Communities** — build and manage communities with structured group communication.
