@@ -7,6 +7,14 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
 	site: 'https://docs.lupyd.com',
 	trailingSlash: 'always',
+	// Keep client-side JavaScript to search only: no link prefetching.
+	prefetch: false,
+	markdown: {
+		shikiConfig: {
+			themes: { light: 'github-light', dark: 'github-dark' },
+			defaultColor: false,
+		},
+	},
 	integrations: [
 		starlight({
 			title: 'Lupyd Docs',
@@ -21,11 +29,19 @@ export default defineConfig({
 				baseUrl: 'https://github.com/lupyd/lupyd-documentation/edit/main/',
 			},
 			lastUpdated: true,
+			// Use Astro's built-in Shiki highlighting instead of Expressive Code,
+			// which ships client-side JavaScript.
+			expressiveCode: false,
 			customCss: ['./src/styles/custom.css'],
 			components: {
 				PageFrame: './src/components/PageFrame.astro',
 				ThemeSelect: './src/components/ThemeSelect.astro',
 				SocialIcons: './src/components/SocialIcons.astro',
+				// No-JS replacements for Starlight components (see README).
+				Sidebar: './src/components/Sidebar.astro',
+				TableOfContents: './src/components/TableOfContents.astro',
+				MobileTableOfContents: './src/components/MobileTableOfContents.astro',
+				LanguageSelect: './src/components/LanguageSelect.astro',
 			},
 			head: [
 				{

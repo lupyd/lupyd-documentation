@@ -10,3 +10,22 @@
 	--sl-color-accent: #111111;
 	--sl-color-accent-high: #000000;
 }
+
+/* Shiki dual-theme code blocks, following the site theme. */
+.astro-code,
+.astro-code span {
+	color: var(--shiki-light);
+	background-color: var(--shiki-light-bg);
+}
+:root[data-theme='dark'] .astro-code,
+:root[data-theme='dark'] .astro-code span {
+	color: var(--shiki-dark);
+	background-color: var(--shiki-dark-bg);
+}
+.sl-markdown-content .astro-code {
+	border: 1px solid var(--sl-color-hairline);
+	border-radius: 0.5rem;
+	padding: 0.75rem 1rem;
+	font-size: var(--sl-text-code);
+	overflow-x: auto;
+}

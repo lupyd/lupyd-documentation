@@ -38,6 +38,20 @@ public/                Copied as-is (favicon, robots.txt)
 astro.config.mjs       Site config, sidebar, and redirects from old URLs
 ```
 
+## JavaScript budget
+
+The site ships no client-side JavaScript except search (Pagefind) and a few tiny
+inline scripts: the theme toggle, applying the saved theme before paint, and the mobile
+menu. To keep it that way:
+
+- `prefetch` is disabled and Expressive Code is replaced by Astro's built-in Shiki
+  highlighting (`astro.config.mjs`).
+- `src/components/` overrides Starlight components that otherwise ship scripts:
+  `Sidebar` (no state persistence), `TableOfContents` and `MobileTableOfContents` (no
+  scroll tracking), and `LanguageSelect` (single locale).
+- Don't add `<script>` tags or client-side framework components (`client:*`) to pages.
+  After `pnpm build`, `dist/_astro/*.js` should contain only the search files.
+
 ## Writing docs
 
 - Every page needs `title` and `description` frontmatter. The description is used for
